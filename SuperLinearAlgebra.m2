@@ -127,6 +127,8 @@ Ber SuperMatrix := (SM) ->(
     Minor22 := submatrix(SM.supermatrix, {SM.targetM1..(SM.targetM1 + SM.targetM3 - 1)}, {SM.targetM1..(SM.targetM1 + SM.targetM3 - 1)});
     Minor21 := submatrix(SM.supermatrix, {SM.targetM1..(SM.targetM1 + SM.targetM3 - 1)}, {0..(SM.sourceM1 - 1)});
     Minor12 := submatrix(SM.supermatrix, {0..(SM.targetM1 - 1)}, {SM.sourceM1..(SM.sourceM1 + SM.sourceM2  - 1)});
+    if numRows Minor11 =!= numColumns Minor11 then error "expected a square matrix";
+    if numRows Minor22 =!= numColumns Minor22 then error "expected a square matrix";
     if det(Minor11) != 0 then det(Minor11)*det(Minor22-Minor21*inverse(Minor11)*Minor12)^{-1}
     else if det(Minor22) != 0 then det(Minor22)^{-1}*det(Minor11-Minor12*inverse(Minor22)*Minor21)
     else error "At least one of the diagonal blocks should be invertible"
