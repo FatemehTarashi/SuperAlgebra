@@ -23,6 +23,7 @@ export {
    "superRing",
    "superMatrix",
    "superTrace",
+   "isOdd",
    
    -- "ishomogeneouse (isodd and iseven)",
    -- "Ber",
@@ -45,7 +46,7 @@ superRing (PolynomialRing,PolynomialRing):= (R1,R2) -> (
 	 R22 := symbol R22; 
 	 R111 := symbol R111;
          R11 = (coefficientRing R1)[R1_0..R1_(n-1),y_0..y_(n-1)];
-	 R111=R11/apply(0..(n-1), i -> sub(R1_i,R11) * y_i - 1);
+	 R111 = R11/apply(0..(n-1), i -> sub(R1_i,R11) * y_i - 1);
          m := #gens R2;
          w := (for i to m-1 list (0))|toList(0..(m-1));
          R22 = (coefficientRing R2)[R2_0..R2_(m-1), MonomialOrder=>{Weights => w,Lex}, SkewCommutative=>true];
@@ -84,12 +85,12 @@ superMatrix (Matrix,Matrix,Matrix,Matrix):= (M1,M2,M3,M4) ->(
          )
 
 TEST ///
-M1 = matrix {{1,2},{5,6},{9,10}}
-M2 = matrix {{3,4},{7,8},{11,12}}
-M3 = matrix {{13,14},{17,18}}
-M4 = matrix {{15,16},{19,20}}
-G = superMatrix(M1,M2,M3,M4)
-G.supermatrix
+M1 = matrix {{1,2},{5,6},{9,10}};
+M2 = matrix {{3,4},{7,8},{11,12}};
+M3 = matrix {{13,14},{17,18}};
+M4 = matrix {{15,16},{19,20}};
+G = superMatrix(M1,M2,M3,M4);
+G.supermatrix;
 assert(G.supermatrix == matrix {{1,2,3,4},{5,6,7,8},{9,10,11,12},{13,14,15,16},{17,18,19,20}})
 assert(G.targetM1 == 3)
 assert(G.targetM3 == 2)
@@ -109,11 +110,11 @@ superTrace SuperMatrix :=(SM)->(
     )
 
 TEST ///
-M1 = matrix {{2,3},{4,5}}
-M2 = matrix {{2,3,8},{4,5,9}}
-M3 = matrix {{2,3},{4,5},{10,11}}
-M4 = matrix {{2,3,18},{5,6,19},{16,17,20}}
-G = superMatrix(M1,M2,M3,M4)
+M1 = matrix {{2,3},{4,5}};
+M2 = matrix {{2,3,8},{4,5,9}};
+M3 = matrix {{2,3},{4,5},{10,11}};
+M4 = matrix {{2,3,18},{5,6,19},{16,17,20}};
+G = superMatrix(M1,M2,M3,M4);
 assert(superTrace G == -21) 
 ///
 
@@ -141,6 +142,7 @@ superDeterminant = Ber ---###
 InverseSuperMatrix = method();
 InverseSuperMatrix SuperMatrix := (SM) ->(
     if numRows SM.supermatrix =!= numColumns SM.supermatrix then error "expected a square matrix";
+    
     Minor11 := submatrix(SM.supermatrix, {0..(SM.targetM1 - 1)}, {0..(SM.sourceM1 - 1)}); 
     Minor22 := submatrix(SM.supermatrix, {SM.targetM1..(SM.targetM1 + SM.targetM3 - 1)}, {SM.targetM1..(SM.targetM1 + SM.targetM3 - 1)});
     Minor21 := submatrix(SM.supermatrix, {SM.targetM1..(SM.targetM1 + SM.targetM3 - 1)}, {0..(SM.sourceM1 - 1)});
@@ -150,6 +152,37 @@ InverseSuperMatrix SuperMatrix := (SM) ->(
     else error "The SuperMatrix is not invertible"
     )
 *-
+
+--------------------
+--isOdd               now work only for function 
+--------------------  -----------
+isOdd = method();
+isOdd (RingElement,Ring,List):=(f,R,a) -> (    --- a= oddlist
+    e := symbol e;
+    e := exponents f;
+    l := symbol l;
+    l={};
+    for i from 0 to (#gens R -1) do (for j from 0 to #a -1 do (if R_(i)==a_(j) then (l= append(l,i))));
+    d := symbol d;
+    v := symbol v; 
+    d=0;
+    v=0;
+    for i from 0 to (#e-1) do (if (d%2)==0 then v=v+1; d=0; for j from 0 to #l-1 do (if 1==(e_i)_(l_j) then (d = d + 1)));
+    d=0; for j from 0 to #l-1 do (if 1==(e_(#e-1))_(l_j) then (d = d + 1)); if (d%2)==0 then v=v+1; 
+    ppp := symbol ppp;
+    if #e==v-1 then print("joz") else ppp= true;
+    ppp
+    )
+
+TEST ///
+R=QQ[x_0..x_4,y_0..y_1];
+f=x_1*x_2*x_3+x_1*y_0+y_1*y_0-4*x_2*y_1*y_0+4;
+a={y_0,y_1} ;
+assert(isOdd(f,R,a) == true)
+///
+
+--------------------
+
 
 beginDocumentation()
 
@@ -175,8 +208,9 @@ Description
     Todo
   Example
     R = QQ[x_1..x_5]
+    F = QQ[y_1..y_5]
     K = QQ[z_1,z_2]
-    superRing(R,K)
+    superRing(F,K)
 Caveat
 SeeAlso
 ///
