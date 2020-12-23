@@ -23,15 +23,16 @@ export {
    "superRing",
    "superMatrix",
    "superTrace",
-   "isOdd",
-   
-   -- "ishomogeneouse (isodd and iseven)",
+   "isSuperHomogeneous",
+
    -- "Ber",
    -- "InverseSuperMatrix",
    
    --Types and keys 
    "SuperMatrix",
-   "supermatrix", "targetM1", "targetM3", "sourceM1", "sourceM2"
+   "supermatrix", "targetM1", "targetM3", "sourceM1", "sourceM2",
+   --option
+   "OddOrEven"
  }
 
 --------------------
@@ -101,7 +102,6 @@ assert(G.sourceM2 == 2)
 --------------------
 --Supertrace           now work
 --------------------  -----------
-
 superTrace = method ();
 superTrace SuperMatrix :=(SM)->(
     Minor11 := submatrix(SM.supermatrix, {0..(SM.targetM1 -1)}, {0..(SM.sourceM1 -1)});
@@ -154,31 +154,36 @@ InverseSuperMatrix SuperMatrix := (SM) ->(
 *-
 
 --------------------
---isOdd               now work only for function 
+--isSuperHomogeneous  now work only for function 
 --------------------  -----------
-isOdd = method();
-isOdd (RingElement,Ring,List):=(f,R,a) -> (    --- a= oddlist
+isSuperHomogeneous = method(Options => {OddOrEven => null});
+isSuperHomogeneous (RingElement,Ring,List) := ZZ => opts -> (f,R,a) -> (
     e := symbol e;
-    e := exponents f;
+    e = exponents f;
     l := symbol l;
     l={};
     for i from 0 to (#gens R -1) do (for j from 0 to #a -1 do (if R_(i)==a_(j) then (l= append(l,i))));
     d := symbol d;
-    v := symbol v; 
-    d=0;
-    v=0;
-    for i from 0 to (#e-1) do (if (d%2)==0 then v=v+1; d=0; for j from 0 to #l-1 do (if 1==(e_i)_(l_j) then (d = d + 1)));
-    d=0; for j from 0 to #l-1 do (if 1==(e_(#e-1))_(l_j) then (d = d + 1)); if (d%2)==0 then v=v+1; 
-    ppp := symbol ppp;
-    if #e==v-1 then print("joz") else ppp= true;
-    ppp
-    )
+    countEvenNumber := symbol countEvenNumber; 
+    d=0; 
+    countEvenNumber =0; 
+    for i from 0 to (#e-1) do (if (d%2)==0 then countEvenNumber = countEvenNumber +1; d=0; for j from 0 to #l-1 do (if 1==(e_i)_(l_j) then (d = d + 1)));
+    d=0; for j from 0 to #l-1 do (if 1==(e_(#e-1))_(l_j) then (d = d + 1)); if (d%2)==0 then countEvenNumber = countEvenNumber +1; 
+    if opts.OddOrEven ===null then (if (countEvenNumber -1) == #e then true else if (countEvenNumber -1) == 0 then true else false) else (if (countEvenNumber -1) == #e then (print("Homogeneous and even");return 0) else if (countEvenNumber -1) == 0 then (print("Homogeneous and odd");return 1) else false) 
+    )  
 
 TEST ///
 R=QQ[x_0..x_4,y_0..y_1];
-f=x_1*x_2*x_3+x_1*y_0+y_1*y_0-4*x_2*y_1*y_0+4;
 a={y_0,y_1} ;
-assert(isOdd(f,R,a) == true)
+g=x_1*x_2*x_3+4;
+f=x_1*x_2*x_3+x_1*y_0+y_1*y_0-4*x_2*y_1*y_0+4;
+h=y_0+y_0*x_0+y_1;
+assert(isSuperHomogeneous(f,R,a) == false)
+assert(isSuperHomogeneous(f,R,a,OddOrEven=>true) == false)
+assert(isSuperHomogeneous(g,R,a) == true)
+assert(isSuperHomogeneous(g,R,a,OddOrEven=>true) == 0)
+assert(isSuperHomogeneous(h,R,a) == true)
+assert(isSuperHomogeneous(h,R,a,OddOrEven=>true) == 1)
 ///
 
 --------------------
