@@ -23,10 +23,9 @@ export {
    "superRing",
    "superMatrix",
    "superTrace",
+   "Berezinian",
    "isSuperHomogeneous",
-
-   -- "Ber",
-   -- "InverseSuperMatrix",
+   "InverseSuperMatrix",
    
    --Types and keys 
    "SuperMatrix",
@@ -53,12 +52,11 @@ superRing (PolynomialRing,PolynomialRing):= (R1,R2) -> (
          R22 = (coefficientRing R2)[R2_0..R2_(m-1), MonomialOrder=>{Weights => w,Lex}, SkewCommutative=>true];
          print concatenate {"is a super commutative ring of dimension", toString m, "|",toString n};
          R111**R22
-         ) 
-     
+         )    
+
 TEST ///
 
-///
-  
+/// 
 --------------------
 --SuperMatrix         now work
 --------------------  -----------
@@ -121,37 +119,90 @@ assert(superTrace G == -21)
 --------------------
 --Berezinian
 --------------------  -----------
--*
-Ber = method();
-Ber SuperMatrix := (SM) ->(
-    Minor11 := submatrix(SM.supermatrix, {0..(SM.targetM1 - 1)}, {0..(SM.sourceM1 - 1)}); 
-    Minor22 := submatrix(SM.supermatrix, {SM.targetM1..(SM.targetM1 + SM.targetM3 - 1)}, {SM.targetM1..(SM.targetM1 + SM.targetM3 - 1)});
-    Minor21 := submatrix(SM.supermatrix, {SM.targetM1..(SM.targetM1 + SM.targetM3 - 1)}, {0..(SM.sourceM1 - 1)});
-    Minor12 := submatrix(SM.supermatrix, {0..(SM.targetM1 - 1)}, {SM.sourceM1..(SM.sourceM1 + SM.sourceM2  - 1)});
-    if det(Minor11) != 0 then det(Minor11)*det(Minor22-Minor21*inverse(Minor11)*Minor12)^{-1}
-    else if det(Minor22) != 0 then det(Minor22)^{-1}*det(Minor11-Minor12*inverse(Minor22)*Minor21)
+Berezinian = method();
+Berezinian (SuperMatrix,Ring) := (SM,R1) ->(
+    Minor11 := submatrix(SM.supermatrix, {0..(SM.targetM1 - 1)}, {0..(SM.sourceM1 - 1)});
+    Minor22 := submatrix(SM.supermatrix, {SM.targetM1..(SM.targetM1 + SM.targetM3 - 1)}, {SM.sourceM1..(SM.sourceM1 + SM.sourceM2 - 1)});
+    Minor12 := submatrix(SM.supermatrix, {SM.targetM1..(SM.targetM1 + SM.targetM3 - 1)}, {0..(SM.sourceM1 - 1)});
+    Minor21 := submatrix(SM.supermatrix, {0..(SM.targetM1 - 1)}, {SM.sourceM1..(SM.sourceM1 + SM.sourceM2 - 1)});
+    SM1 = sub(Minor11,R1);
+    SM2 = sub(Minor22,R1);
+    Prod1 = Minor22 - Minor12*inverse(SM1)*Minor21;
+    Prod2 = sub(Prod1,R1);
+    if numRows Minor11 =!= numColumns Minor11 then error "expected a square matrix";
+    if numRows Minor22 =!= numColumns Minor22 then error "expected a square matrix";
+    if det(Minor22) =!= 0 then det(inverse(SM2))*det(Minor11-Minor21*inverse(SM2)*Minor12)
+    else if (det(Minor11) =!= 0 and det(Minor22 - Minor12*inverse(SM1)*Minor21) =!= 0) then det(Minor11)*det(inverse(Prod2))
     else error "At least one of the diagonal blocks should be invertible"
     )
-superDeterminant = Ber ---###
-*-
+ 
+--superDeterminant = Berezinian ---###
+TEST///
+M1 = matrix{{5,7},{1,2}}
+M2 = matrix{{1,2,3},{4,5,6}}
+M3 = matrix{{3,4},{5,6},{7,8}}
+M4 = matrix{{2,3,11},{4,5,6},{7,8,9}}
+M5 = sub(M4,QQ)
+G = superMatrix(M1,M2,M3,M4)
+assert(Berezinian(G,QQ)== det(inverse(M5))*det(M1-M2*inverse(M5)*M3))
+--Example2
+S1 = matrix{{1,2},{3,4}}
+S2 = matrix{{5,6},{7,8}}
+S3 = matrix{{9,10},{11,12}}
+S4 = matrix{{0,0},{0,0}}
+S5 = sub(S1,QQ)
+S6 = S4 - S3*inverse(S5)*S2
+F = superMatrix(S1,S2,S3,S4)
+assert(Berezinian(F,QQ) == det(S1)*det(inverse(S6)))
+///
 
 ------------------------
 --inversesupermatrix
 ----------------------
--*
-InverseSuperMatrix = method();
-InverseSuperMatrix SuperMatrix := (SM) ->(
-    if numRows SM.supermatrix =!= numColumns SM.supermatrix then error "expected a square matrix";
-    
-    Minor11 := submatrix(SM.supermatrix, {0..(SM.targetM1 - 1)}, {0..(SM.sourceM1 - 1)}); 
-    Minor22 := submatrix(SM.supermatrix, {SM.targetM1..(SM.targetM1 + SM.targetM3 - 1)}, {SM.targetM1..(SM.targetM1 + SM.targetM3 - 1)});
-    Minor21 := submatrix(SM.supermatrix, {SM.targetM1..(SM.targetM1 + SM.targetM3 - 1)}, {0..(SM.sourceM1 - 1)});
-    Minor12 := submatrix(SM.supermatrix, {0..(SM.targetM1 - 1)}, {SM.sourceM1..(SM.sourceM1 + SM.sourceM2  - 1)});
-    if det(Minor11) != 0 and det (Minor22) != 0 then
-    
+inverseSuperMatrix = method();
+inverseSuperMatrix (SuperMatrix,Ring) := (SM,R1) ->(
+    Minor11 := submatrix(SM.supermatrix, {0..(SM.targetM1 - 1)}, {0..(SM.sourceM1 - 1)});
+    Minor22 := submatrix(SM.supermatrix, {SM.targetM1..(SM.targetM1 + SM.targetM3 - 1)}, {SM.sourceM1..(SM.sourceM1 + SM.sourceM2 - 1)});
+    Minor12 := submatrix(SM.supermatrix, {SM.targetM1..(SM.targetM1 + SM.targetM3 - 1)}, {0..(SM.sourceM1 - 1)});
+    Minor21 := submatrix(SM.supermatrix, {0..(SM.targetM1 - 1)}, {SM.sourceM1..(SM.sourceM1 + SM.sourceM2 - 1)});
+    if numRows Minor11 =!= numColumns Minor11 then error "expected a square matrix";
+    if numRows Minor22 =!= numColumns Minor22 then error "expected a square matrix";
+    SM11 = sub(Minor11,R1);
+    SM22 = sub(Minor22,R1);
+    SM12 = sub(Minor12,R1);
+    SM21 = sub(Minor21,R1);
+    Prod1 = SM22 - SM12*inverse(SM11)*SM21;
+    Prod2 = SM11 - SM21*inverse(SM22)*SM12;
+    Nminor11 = inverse(Prod2);
+    Nminor12 = -inverse(SM22)*SM12*inverse(Prod2);
+    Nminor21 = -inverse(SM11)*SM21*inverse(Prod1);
+    Nminor22 = inverse(Prod1);
+    NSM1 = Nminor11 | Nminor21;
+    NSM2 = Nminor12 | Nminor22;
+    if (det(SM11) =!= 0 and det (SM22) =!= 0) then NSM1 || NSM2
     else error "The SuperMatrix is not invertible"
     )
-*-
+
+TEST///
+M1 = matrix{{5,7},{1,2}}
+M2 = matrix{{1,2,3},{4,5,6}}
+M3 = matrix{{3,4},{5,6},{7,8}}
+M4 = matrix{{2,3,11},{4,5,6},{7,8,9}}
+M44 = sub(M4,QQ)
+M11 = sub(M1,QQ)
+M22 = sub(M2,QQ)
+M33 = sub(M3,QQ)
+P2 = M44 - M33*inverse(M11)*M22
+P1 = M11 - M22*inverse(M44)*M33
+N11 = inverse(P1)
+N12 = -inverse(M44)*M33*inverse(P1)
+N21 = -inverse(M11)*M22*inverse(P2)
+N22 = inverse(P2)
+NM1 = N11 | N21
+NM2 = N12 | N22
+G = superMatrix(M1,M2,M3,M4)
+assert(inverseSuperMatrix(G,QQ) == NM1 || NM2)
+///
 
 --------------------
 --isSuperHomogeneous  now work only for function 
