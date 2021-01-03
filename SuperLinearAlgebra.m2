@@ -45,23 +45,6 @@ export {
 --------------------------------------------------------------
 --SuperRing (Super commutative ring)  ### y(inverse) need work
 --------------------------------------------------------------
---------------------------------------------------------------
---Inputs
---------------------------------------------------------------
--- R1 and R2 Two Polynomial rings on different set of variables
--------------------------------------------------------------
---Outputs
-------------------------------------------------------------
--* superRing a new polynomial ring with three sets of variables. 
-One set comes from R1 and the second one is the inverse of it.
-For example, if we have x as a variable in R1, then there is a new variable,
-say y_0 which is the inverse of x.
-The third set of variables comes from R2.
-We redefine this set to be a set of skew-symmetric variables.
-So superRing of R1 and R2 is a quotient ring,
-which has both invertible and skew symmetric variables.
-If the coefficient ring a a field, then we get a super algebra.
-*---------------------------------------------------------------
 superRing = method();
 superRing (PolynomialRing,PolynomialRing):= (R1,R2) -> (
          n := #gens R1;
@@ -74,7 +57,7 @@ superRing (PolynomialRing,PolynomialRing):= (R1,R2) -> (
          m := #gens R2;
          w := (for i to m-1 list (0))|toList(0..(m-1));
          R22 = (coefficientRing R2)[R2_0..R2_(m-1), MonomialOrder=>{Weights => w,Lex}, SkewCommutative=>true];
-         print concatenate {"is a super commutative ring of dimension", toString m, "|",toString n};
+         print concatenate {"is a super commutative ring of dimension", toString n, "|",toString m};
          R111**R22
          )    
 
@@ -85,37 +68,6 @@ TEST ///
 --SuperMatrix
 --This a is new mulitivariate Hash table with 5 keys.
 --supermatrix, targetM1, targetM3, sourceM1, sourceM2
--------------------------------------------------------
------------------Inputs
--------------------------------------------------------
--*M1,M2,M3,M4 are four matrices. The number of rows in M1 and M2,
-and those of M3 and M4 should be equal.
-Also, the number of columns of M1 and M3, and those of M2 and M4 must be equal.
-The idea is to define a (super) Matrix, which can be cosidered as p|q\times r|s matrix.
-This super Matrix is a morphism between super mosules A^{p|q} and A^{r|s} over super algebra A. 
-*-----------------------------------------------------
------------------Outputs
--*
-The function merges the matrices M1 and M2, and also M3 and M4. 
-Finally it merges two new matrices and 
-make a new matrix with the first four matrices as the blocks of the new matrix.
-The key supermatrix shows the result matrix created as above.
-The key targetM1 shows the number of first part rows (p in p|q\times r|s)
-The key targetM3 shows the number of the rowsss of the second part
-The key sourceM1 shows the number of columns in the first part
-The key sourceM2 shows the number of columns in the second part
-Example
-Consider the following matrix which is otained by marging four matrices as above.
-             
-	     source.M1  source.M2
-	     ---------------------
-             |         |         |
-target.M1    |   M1    |  M2     | 
-             |---------|---------|
-             |         |         |
-target.M3    |   M3    |  M4     |
-             |---------|---------|
-*-
 ------------------------------------------------
 SuperMatrix = new Type of MutableHashTable;
 --a SuperMatrix always has the following keys:
@@ -276,7 +228,22 @@ inverseSuperMatrix (SuperMatrix,Ring) := (SM,R1) ->(
     NSM2 := Nminor12 | Nminor22;
     if (det(SM11) =!= 0 and det (SM22) =!= 0) then NSM1 || NSM2 else error "The SuperMatrix is not invertible"
     )
+R1 = QQ[x_0..x_5]
+R2 = QQ[e_0..e_3]
+R = superRing(R1,R2)
+S1 = QQ[t_0,t_1]
+S2 = QQ[z_0,z_1]
+S = superRing(S1,S2)
+M1 = matrix{{t_0}}
+M2 = matrix{{z_1}}
+M3 = matrix{{z_0}}
+M4 = matrix{{t_1}}
+inverse(M1)
+M = superMatrix(M1,M2,M3,M4)
+inverseSuperMatrix(M,S)
+M.supermatrix
 
+inverse(f)
 TEST///
 M1 = matrix{{5,7},{1,2}};
 M2 = matrix{{1,2,3},{4,5,6}};
@@ -319,11 +286,14 @@ isSuperHomogeneous (RingElement,Ring,List) := ZZ => opts -> (f,R,a) -> (
     )  
 
 TEST ///
-R=QQ[x_0..x_4,y_0..y_1];
-a={y_0,y_1} ;
-g=x_1*x_2*x_3+4;
-f=x_1*x_2*x_3+x_1*y_0+y_1*y_0-4*x_2*y_1*y_0+4;
-h=y_0+y_0*x_0+y_1;
+R1=QQ[x_0..x_4];
+R2=QQ[e_0,e_1];
+R= superRing(R1,R2)
+a={e_0,e_1}
+f=x_1*x_2*x_3+x_1*e_0+e_1*e_0-4*x_2*e_1*e_0+4
+isSuperHomogeneous(f,R,a)
+g=x_1*x_2*x_3+e_0e_1+4;
+isSuperHomogeneous(g,R,a)
 assert(isSuperHomogeneous(f,R,a) == false)
 assert(isSuperHomogeneous(f,R,a,OddOrEven=>true) == false)
 assert(isSuperHomogeneous(g,R,a) == true)
@@ -358,6 +328,17 @@ Headline
   Super ring
 Description
   Text
+    Let $R_1$ and $R_2$ be Two Polynomial rings on different set of variables
+    A superRing is a new polynomial ring with three sets of variables. 
+    One set comes from $R_1$ and the second one is the inverse of it.
+    For example, if we have $x$ as a variable in $R_1$,
+    then there is a new variable, say $y_0$ which is the inverse of $x$.
+    The third set of variables comes from $R_2$.
+    We redefine this set to be a set of skew-symmetric variables.
+    So superRing of $R_1$ and $R_2$ is a quotient ring,
+    which has both invertible and skew symmetric variables.
+    If the coefficient ring a a field, then we get a super algebra.
+
     Todo
   Example
 <<<<<<< HEAD
@@ -382,6 +363,27 @@ Headline
   Super matrix
 Description
   Text
+   Let $M_1,M_2,M_3,M_4$ are four matrices. 
+   The number of rows in $M_1$ and $M_2$,
+   and those of $M_3$ and $M_4$ should be equal.
+   Also, the number of columns of $M_1$ and $M_3$,
+   and those of $M_2$ and $M_4$ must be equal.
+   The idea is to define a (super) Matrix,
+   which can be cosidered as $p|q\times r|s$ matrix.
+   This super Matrix can be a morphism between super
+   modules $A^{p|q}$ and $A^{r|s}$ over super algebra $A$. 
+
+   The function merges the matrices $M_1$ and $M_2$, and also $M_3$ and $M_4$. 
+   Finally it merges two new matrices and 
+   make a new matrix with the first four matrices as
+   the blocks of the new matrix, say $\begin{bmatrix}M_1 & M_2 \\
+   M_3 & M_4   \end{bmatrix}$.
+   The key supermatrix shows the result matrix created as above.
+   The key targetM1 shows the number of first part rows.
+   The key targetM3 shows the number of the rowsss of the second part
+   The key sourceM1 shows the number of columns in the first part
+   The key sourceM2 shows the number of columns in the second part.
+
     Todo
  Example
     M1 = matrix {{1,2},{5,6},{9,10}}
@@ -422,6 +424,17 @@ Headline
   Berezinian
 Description
   Text
+  If in a super Matrix, one of the first or the second diagonal block is invertible,
+  then we can define Berezinian (as a kind of super Determinant).
+  The formula for the Berezinian is different base on which block is invertible.
+  But it is shown that the two formulas are equivallent if two blocks are invertible.
+  If $M=\begin{bmatrix}M_1 & M_2 \\ M_3 & M_4   \end{bmatrix}$ is a super Matrix, and
+  $M_4$ is invertible, then 
+  $Ber(M)= \det(M_1-M_2M^{-1}_4M_3)\det(M_4)^{-1}$.
+  
+  If $M_1$ is invertible, then 
+  $ Ber(M) = det(M_4-M_3M_1^{-1}M_2)^{-1}\det(M_1)$.
+
     Todo
  Example
     M1 = matrix{{5,7},{1,2}}
@@ -443,13 +456,19 @@ Headline
   isSuperHomogeneous
 Description
   Text
+  Let we have a super algebra (ring), $R=R_0\oplus R_1$.
+  A homogeneouse element of $R$ is an elemet belongs to $R_0$ or $R_1$.
+  If $x\in R_0$, we say $x$ is even, and if $x\in R_1$, we say $x$ is odd.
+  
     Todo
  Example
-    R=QQ[x_0..x_4,y_0..y_1];
-    a={y_0,y_1}
-    f=x_1*x_2*x_3+x_1*y_0+y_1*y_0-4*x_2*y_1*y_0+4
+    R1=QQ[x_0..x_4];
+    R2=QQ[e_0,e_1];
+    R= superRing(R1,R2)
+    a={e_0,e_1}
+    f=x_1*x_2*x_3+x_1*e_0+e_1*e_0-4*x_2*e_1*e_0+4
     isSuperHomogeneous(f,R,a)
-    g=x_1*x_2*x_3+4;
+    g=x_1*x_2*x_3+e_0e_1+4;
     isSuperHomogeneous(g,R,a)
 Caveat
 SeeAlso
@@ -463,6 +482,16 @@ Headline
   InverseSuperMatrix
 Description
   Text
+  A super Matrix $M=\begin{bmatrix}M_1 & M_2 \\ M_3 & M_4   \end{bmatrix}$
+  is invertible, if both the diagonal blocks, $M_1$ and $M_4$ are invertible.
+  In this case, the inverse is given by a blocked matrix,
+  $T=\begin{bmatrix}T_1 & T_2 \\ T_3 & T_4   \end{bmatrix}$, where
+  
+  $T_1=(M_1 − M_2M^{-1}_4 M_3)^{-1}$,
+  $T_2=−M^{-1}_1 M_2(M_4 − M_3M^{-1}_1 M_2)^{-1}$,
+  $T_3=−M^{-1}_4 M_3(M_1 − M_2M^{-1}_4 M_3)^{-1}$, and
+  $T_4=(M_4 − M_3M^{-1}_1 M_2)^{-1}$.
+  
     Todo
  Example
     M1 = matrix{{5,7},{1,2}};
