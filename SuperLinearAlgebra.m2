@@ -25,19 +25,12 @@ export {
    "superTrace",
    "Berezinian",
    "isSuperHomogeneous",
-<<<<<<< HEAD
-   "InverseSuperMatrix",
-=======
    "inverseSuperMatrix",
->>>>>>> Some comments are added
-   
+  
    --Types and keys 
    "SuperMatrix",
    "supermatrix", "targetM1", "targetM3", "sourceM1", "sourceM2",
-<<<<<<< HEAD
-=======
-   
->>>>>>> Some comments are added
+
    --option
    "OddOrEven"
  }
@@ -107,13 +100,8 @@ assert(G.sourceM2 == 2)
 ///
 
 --------------------
-<<<<<<< HEAD
---Supertrace           now work
---------------------  -----------
-=======
 --Supertrace           
 --------------------  
->>>>>>> Some comments are added
 superTrace = method ();
 superTrace SuperMatrix :=(SM)->(
     Minor11 := submatrix(SM.supermatrix, {0..(SM.targetM1 -1)}, {0..(SM.sourceM1 -1)});
@@ -228,22 +216,8 @@ inverseSuperMatrix (SuperMatrix,Ring) := (SM,R1) ->(
     NSM2 := Nminor12 | Nminor22;
     if (det(SM11) =!= 0 and det (SM22) =!= 0) then NSM1 || NSM2 else error "The SuperMatrix is not invertible"
     )
-R1 = QQ[x_0..x_5]
-R2 = QQ[e_0..e_3]
-R = superRing(R1,R2)
-S1 = QQ[t_0,t_1]
-S2 = QQ[z_0,z_1]
-S = superRing(S1,S2)
-M1 = matrix{{t_0}}
-M2 = matrix{{z_1}}
-M3 = matrix{{z_0}}
-M4 = matrix{{t_1}}
-inverse(M1)
-M = superMatrix(M1,M2,M3,M4)
-inverseSuperMatrix(M,S)
-M.supermatrix
 
-inverse(f)
+
 TEST///
 M1 = matrix{{5,7},{1,2}};
 M2 = matrix{{1,2,3},{4,5,6}};
@@ -265,7 +239,6 @@ G = superMatrix(M1,M2,M3,M4);
 assert(inverseSuperMatrix(G,QQ) == NM1 || NM2)
 ///
 
-<<<<<<< HEAD
 --------------------
 --isSuperHomogeneous  now work only for function 
 --------------------  -----------
@@ -292,7 +265,7 @@ R= superRing(R1,R2)
 a={e_0,e_1}
 f=x_1*x_2*x_3+x_1*e_0+e_1*e_0-4*x_2*e_1*e_0+4
 isSuperHomogeneous(f,R,a)
-g=x_1*x_2*x_3+e_0e_1+4;
+g=x_1*x_2*x_3+e_0*e_1+4;
 isSuperHomogeneous(g,R,a)
 assert(isSuperHomogeneous(f,R,a) == false)
 assert(isSuperHomogeneous(f,R,a,OddOrEven=>true) == false)
@@ -301,8 +274,6 @@ assert(isSuperHomogeneous(g,R,a,OddOrEven=>true) == 0)
 assert(isSuperHomogeneous(h,R,a) == true)
 assert(isSuperHomogeneous(h,R,a,OddOrEven=>true) == 1)
 ///
-=======
->>>>>>> Some comments are added
 
 --------------------
 
@@ -339,18 +310,10 @@ Description
     which has both invertible and skew symmetric variables.
     If the coefficient ring a a field, then we get a super algebra.
 
-    Todo
   Example
-<<<<<<< HEAD
-    R = QQ[x_1..x_5]
-    F = QQ[y_1..y_5]
-    K = QQ[z_1,z_2]
-    superRing(F,K)
-=======
     r1=QQ[x_1..x_5]
     r2=QQ[z_1..z_3]
     superRing(r1,r2)
->>>>>>> Some comments are added
 Caveat
 SeeAlso
 ///
@@ -369,7 +332,7 @@ Description
    Also, the number of columns of $M_1$ and $M_3$,
    and those of $M_2$ and $M_4$ must be equal.
    The idea is to define a (super) Matrix,
-   which can be cosidered as $p|q\times r|s$ matrix.
+   which can be considered as $p|q\times r|s$ matrix.
    This super Matrix can be a morphism between super
    modules $A^{p|q}$ and $A^{r|s}$ over super algebra $A$. 
 
@@ -380,11 +343,10 @@ Description
    M_3 & M_4   \end{bmatrix}$.
    The key supermatrix shows the result matrix created as above.
    The key targetM1 shows the number of first part rows.
-   The key targetM3 shows the number of the rowsss of the second part
+   The key targetM3 shows the number of the rows of the second part
    The key sourceM1 shows the number of columns in the first part
    The key sourceM2 shows the number of columns in the second part.
 
-    Todo
  Example
     M1 = matrix {{1,2},{5,6},{9,10}}
     M2 = matrix {{3,4},{7,8},{11,12}}
@@ -427,15 +389,13 @@ Description
   If in a super Matrix, one of the first or the second diagonal block is invertible,
   then we can define Berezinian (as a kind of super Determinant).
   The formula for the Berezinian is different base on which block is invertible.
-  But it is shown that the two formulas are equivallent if two blocks are invertible.
+  But it is shown that the two formulas are equivalent if two blocks are invertible.
   If $M=\begin{bmatrix}M_1 & M_2 \\ M_3 & M_4   \end{bmatrix}$ is a super Matrix, and
   $M_4$ is invertible, then 
   $Ber(M)= \det(M_1-M_2M^{-1}_4M_3)\det(M_4)^{-1}$.
   
   If $M_1$ is invertible, then 
   $ Ber(M) = det(M_4-M_3M_1^{-1}M_2)^{-1}\det(M_1)$.
-
-    Todo
  Example
     M1 = matrix{{5,7},{1,2}}
     M2 = matrix{{1,2,3},{4,5,6}}
@@ -457,10 +417,9 @@ Headline
 Description
   Text
   Let we have a super algebra (ring), $R=R_0\oplus R_1$.
-  A homogeneouse element of $R$ is an elemet belongs to $R_0$ or $R_1$.
+  A homogeneous element of $R$ is an element belongs to $R_0$ or $R_1$.
   If $x\in R_0$, we say $x$ is even, and if $x\in R_1$, we say $x$ is odd.
-  
-    Todo
+
  Example
     R1=QQ[x_0..x_4];
     R2=QQ[e_0,e_1];
@@ -468,7 +427,7 @@ Description
     a={e_0,e_1}
     f=x_1*x_2*x_3+x_1*e_0+e_1*e_0-4*x_2*e_1*e_0+4
     isSuperHomogeneous(f,R,a)
-    g=x_1*x_2*x_3+e_0e_1+4;
+    g=x_1*x_2*x_3+e_0*e_1+4;
     isSuperHomogeneous(g,R,a)
 Caveat
 SeeAlso
@@ -491,8 +450,7 @@ Description
   $T_2=−M^{-1}_1 M_2(M_4 − M_3M^{-1}_1 M_2)^{-1}$,
   $T_3=−M^{-1}_4 M_3(M_1 − M_2M^{-1}_4 M_3)^{-1}$, and
   $T_4=(M_4 − M_3M^{-1}_1 M_2)^{-1}$.
-  
-    Todo
+
  Example
     M1 = matrix{{5,7},{1,2}};
     M2 = matrix{{1,2,3},{4,5,6}};
