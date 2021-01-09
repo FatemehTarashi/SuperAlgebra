@@ -26,11 +26,11 @@ export {
    "Berezinian",
    "isSuperHomogeneous",
    "inverseSuperMatrix",
-  
+
    --Types and keys 
    "SuperMatrix",
    "supermatrix", "targetM1", "targetM3", "sourceM1", "sourceM2",
-
+   
    --option
    "OddOrEven"
  }
@@ -38,6 +38,7 @@ export {
 --------------------------------------------------------------
 --SuperRing (Super commutative ring)  ### y(inverse) need work
 --------------------------------------------------------------
+
 superRing = method();
 superRing (PolynomialRing,PolynomialRing):= (R1,R2) -> (
          n := #gens R1;
@@ -62,9 +63,8 @@ TEST ///
 --This a is new mulitivariate Hash table with 5 keys.
 --supermatrix, targetM1, targetM3, sourceM1, sourceM2
 ------------------------------------------------
+
 SuperMatrix = new Type of MutableHashTable;
---a SuperMatrix always has the following keys:
--- supermatrix, targetM1, targetM3, sourceM1, sourceM2
 
 superMatrix = method();
 superMatrix (Matrix,Matrix,Matrix,Matrix):= (M1,M2,M3,M4) ->(
@@ -301,6 +301,54 @@ assert(isSuperHomogeneous(h,R,a) == true)
 assert(isSuperHomogeneous(h,R,a,OddOrEven=>true) == 1)
 ///
 
+------------------------
+--inversesupermatrix
+----------------------
+inverseSuperMatrix = method();
+inverseSuperMatrix (SuperMatrix,Ring) := (SM,R1) ->(
+    Minor11 := submatrix(SM.supermatrix, {0..(SM.targetM1 - 1)}, {0..(SM.sourceM1 - 1)});
+    Minor22 := submatrix(SM.supermatrix, {SM.targetM1..(SM.targetM1 + SM.targetM3 - 1)}, {SM.sourceM1..(SM.sourceM1 + SM.sourceM2 - 1)});
+    Minor12 := submatrix(SM.supermatrix, {SM.targetM1..(SM.targetM1 + SM.targetM3 - 1)}, {0..(SM.sourceM1 - 1)});
+    Minor21 := submatrix(SM.supermatrix, {0..(SM.targetM1 - 1)}, {SM.sourceM1..(SM.sourceM1 + SM.sourceM2 - 1)});
+    if numRows Minor11 =!= numColumns Minor11 then error "expected a square matrix";
+    if numRows Minor22 =!= numColumns Minor22 then error "expected a square matrix";    
+    SM11 := sub(Minor11,R1);
+    SM22 := sub(Minor22,R1);
+    SM12 := sub(Minor12,R1);
+    SM21 := sub(Minor21,R1);
+    Prod1 := SM22 - SM12*inverse(SM11)*SM21;
+    Prod2 := SM11 - SM21*inverse(SM22)*SM12;
+    Nminor11 := inverse(Prod2);
+    Nminor12 := -inverse(SM22)*SM12*inverse(Prod2);
+    Nminor21 := -inverse(SM11)*SM21*inverse(Prod1);
+    Nminor22 := inverse(Prod1);
+    NSM1 := Nminor11 | Nminor21;
+    NSM2 := Nminor12 | Nminor22;
+    if (det(SM11) =!= 0 and det (SM22) =!= 0) then NSM1 || NSM2 else error "The SuperMatrix is not invertible"
+    )
+
+TEST///
+M1 = matrix{{5,7},{1,2}};
+M2 = matrix{{1,2,3},{4,5,6}};
+M3 = matrix{{3,4},{5,6},{7,8}};
+M4 = matrix{{2,3,11},{4,5,6},{7,8,9}};
+M44 = sub(M4,QQ);
+M11 = sub(M1,QQ);
+M22 = sub(M2,QQ);
+M33 = sub(M3,QQ);
+P2 = M44 - M33*inverse(M11)*M22;
+P1 = M11 - M22*inverse(M44)*M33;
+N11 = inverse(P1);
+N12 = -inverse(M44)*M33*inverse(P1);
+N21 = -inverse(M11)*M22*inverse(P2);
+N22 = inverse(P2);
+NM1 = N11 | N21;
+NM2 = N12 | N22;
+G = superMatrix(M1,M2,M3,M4);
+assert(inverseSuperMatrix(G,QQ) == NM1 || NM2)
+///
+
+
 --------------------
 
 
@@ -351,7 +399,6 @@ Key
 Headline
   Super matrix
 Description
-  Text
    Let $M_1,M_2,M_3,M_4$ are four matrices. 
    The number of rows in $M_1$ and $M_2$,
    and those of $M_3$ and $M_4$ should be equal.
@@ -372,7 +419,6 @@ Description
    The key targetM3 shows the number of the rows of the second part
    The key sourceM1 shows the number of columns in the first part
    The key sourceM2 shows the number of columns in the second part.
-
  Example
     M1 = matrix {{1,2},{5,6},{9,10}}
     M2 = matrix {{3,4},{7,8},{11,12}}
@@ -403,7 +449,6 @@ Description
 Caveat
 SeeAlso
 ///
-
 
 doc ///
 Key 
@@ -441,7 +486,6 @@ Key
 Headline
   isSuperHomogeneous
 Description
-  Text
   Let we have a super algebra (ring), $R=R_0\oplus R_1$.
   A homogeneous element of $R$ is an element belongs to $R_0$ or $R_1$.
   If $x\in R_0$, we say $x$ is even, and if $x\in R_1$, we say $x$ is odd.
@@ -466,7 +510,6 @@ Key
 Headline
   InverseSuperMatrix
 Description
-  Text
   A super Matrix $M=\begin{bmatrix}M_1 & M_2 \\ M_3 & M_4   \end{bmatrix}$
   is invertible, if both the diagonal blocks, $M_1$ and $M_4$ are invertible.
   In this case, the inverse is given by a blocked matrix,
@@ -476,7 +519,6 @@ Description
   $T_2=−M^{-1}_1 M_2(M_4 − M_3M^{-1}_1 M_2)^{-1}$,
   $T_3=−M^{-1}_4 M_3(M_1 − M_2M^{-1}_4 M_3)^{-1}$, and
   $T_4=(M_4 − M_3M^{-1}_1 M_2)^{-1}$.
-
  Example
     M1 = matrix{{5,7},{1,2}};
     M2 = matrix{{1,2,3},{4,5,6}};
