@@ -99,6 +99,32 @@ assert(G.sourceM1 == 2)
 assert(G.sourceM2 == 2)
 ///
 
+
+---------------------------------------------------
+--isSkewSymmetric            --For Polynomial Rings
+--------------------------------------------------
+isSkewSymmetric = method();
+isSkewSymmetric Ring := (R1)->(
+          i1 := symbol i1;
+          i1 = numgens R1;
+          L1 := apply(numgens R1, i -> R1_i^2);
+          O1 := symbol O1;
+          e1 := symbol e1;
+          O1 = 0;
+          e1 = 0;
+          for j from 0 to (i1-1) do(if take(L1,{j,j})=={0} then O1=O1+1);
+          if O1 =!= 0 then true else false
+           )
+
+TEST ///
+r1 = QQ[x_0..x_3]
+r2 = QQ[z_0..z_2]
+r = superRing(r1,r2)
+assert(isSkewSymmetric r == true)
+R=QQ[x_0..x_5]
+assert(isSkewSymmetric R ==false)
+///
+
 --------------------
 --Supertrace           
 --------------------  
