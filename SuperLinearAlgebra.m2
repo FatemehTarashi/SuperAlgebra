@@ -25,14 +25,15 @@ export {
    "superTrace",
    "Berezinian",
    "isSuperHomogeneous",
+   "isEven",
+   "isOdd",
+   "isSuperMatrixHomogeneous",
    "inverseSuperMatrix",
-  
+   "isSkewSymmetric",
+   
    --Types and keys 
    "SuperMatrix",
    "supermatrix", "targetM1", "targetM3", "sourceM1", "sourceM2",
-
-   --option
-   "OddOrEven"
  }
 
 --------------------------------------------------------------
@@ -54,9 +55,6 @@ superRing (PolynomialRing,PolynomialRing):= (R1,R2) -> (
          R111**R22
          )    
 
-TEST ///
-
-/// 
 ------------------------------------------------------
 --SuperMatrix
 --This a is new mulitivariate Hash table with 5 keys.
@@ -99,7 +97,6 @@ assert(G.sourceM1 == 2)
 assert(G.sourceM2 == 2)
 ///
 
-
 ---------------------------------------------------
 --isSkewSymmetric            --For Polynomial Rings
 --------------------------------------------------
@@ -125,6 +122,201 @@ R=QQ[x_0..x_5]
 assert(isSkewSymmetric R ==false)
 ///
 
+
+--------------------
+--isSuperHomogeneous  now work only for function 
+--------------------  -----------
+isSuperHomogeneous = method();
+isSuperHomogeneous (RingElement,Ring,List) := (f,R,a) -> (
+    e := symbol e;
+    e = exponents f;
+    l := symbol l;
+    l={};
+    for i from 0 to (#gens R -1) do (for j from 0 to #a -1 do (if R_(i)==a_(j) then (l= append(l,i))));
+    d := symbol d;
+    countEvenNumber := symbol countEvenNumber; 
+    d=0; 
+    countEvenNumber =0; 
+    for i from 0 to (#e-1) do (if (d%2)==0 then countEvenNumber = countEvenNumber +1; d=0; for j from 0 to #l-1 do (if 1==(e_i)_(l_j) then (d = d + 1)));
+    d=0; for j from 0 to #l-1 do (if 1==(e_(#e-1))_(l_j) then (d = d + 1)); if (d%2)==0 then countEvenNumber = countEvenNumber +1; 
+    if (countEvenNumber -1) == #e then true else if (countEvenNumber -1) == 0 then true else false 
+    ) 
+TEST ///
+R1=QQ[x_0..x_4];
+R2=QQ[e_0,e_1];
+R= superRing(R1,R2);
+a={e_0,e_1};
+f=x_1*x_2*x_3+x_1*e_0+e_1*e_0-4*x_2*e_1*e_0+4;
+g=x_1*x_2*x_3+e_0*e_1+4;
+assert(isSuperHomogeneous(f,R,a) == false)
+assert(isSuperHomogeneous(g,R,a) == true)
+///
+---------------------------------------
+--isOdd
+--------------------------------------
+isOdd = method();
+isOdd (RingElement,Ring,List) := (f,R,a) -> (
+    e := symbol e;
+    e = exponents f;
+    l := symbol l;
+    l={};
+    for i from 0 to (#gens R -1) do (for j from 0 to #a -1 do (if R_(i)==a_(j) then (l= append(l,i))));
+    d := symbol d;
+    countEvenNumber := symbol countEvenNumber; 
+    d=0; 
+    countEvenNumber =0; 
+    for i from 0 to (#e-1) do (if (d%2)==0 then countEvenNumber = countEvenNumber +1; d=0; for j from 0 to #l-1 do (if 1==(e_i)_(l_j) then (d = d + 1)));
+    d=0; for j from 0 to #l-1 do (if 1==(e_(#e-1))_(l_j) then (d = d + 1)); if (d%2)==0 then countEvenNumber = countEvenNumber +1; 
+    if (countEvenNumber -1) == 0 then true  else false 
+    )  
+
+TEST ///
+R1=QQ[x_0..x_4];
+R2=QQ[e_0,e_1];
+R= superRing(R1,R2);
+a={e_0,e_1};
+g=x_1*x_2*x_3+e_0*e_1+4;
+h=x_1*e_1;
+assert(isOdd(g,R,a) == false)
+assert(isOdd(h,R,a) == true)
+///
+
+--------------------
+--isEven
+--------------------  
+isEven = method();
+isEven (RingElement,Ring,List) := (f,R,a) -> (
+    e := symbol e;
+    e = exponents f;
+    l := symbol l;
+    l={};
+    for i from 0 to (#gens R -1) do (for j from 0 to #a -1 do (if R_(i)==a_(j) then (l= append(l,i))));
+    d := symbol d;
+    countEvenNumber := symbol countEvenNumber; 
+    d=0; 
+    countEvenNumber =0; 
+    for i from 0 to (#e-1) do (if (d%2)==0 then countEvenNumber = countEvenNumber +1; d=0; for j from 0 to #l-1 do (if 1==(e_i)_(l_j) then (d = d + 1)));
+    d=0; for j from 0 to #l-1 do (if 1==(e_(#e-1))_(l_j) then (d = d + 1)); if (d%2)==0 then countEvenNumber = countEvenNumber +1; 
+    if (countEvenNumber -1) == #e then true  else false 
+    )  
+
+TEST ///
+R1=QQ[x_0..x_4];
+R2=QQ[e_0,e_1];
+R= superRing(R1,R2);
+a={e_0,e_1};
+g=x_1*x_2*x_3+e_0*e_1+4;
+h=x_1*e_1;
+assert(isEven(g,R,a) == true)
+assert(isEven(h,R,a) == false)
+///
+------------------------------------
+--isSuperMatrixHomogeneous
+--------------------------------
+isSuperMatrixHomogeneous = method(Options=> {EvenOrOddMatrix=>null});
+isSuperMatrixHomogeneous(SuperMatrix,Ring,List) := ZZ => opts -> (SM,R1,a) ->(
+    m1 := symbol m1;
+    m2 := symbol m2;
+    m3 := symbol m3;
+    m4 := symbol m4;
+    m1 = 0;
+    m2 = 0;
+    m3 = 0;
+    m4 = 0;
+    r1 := symbol r1;
+    r2 := symbol r2;
+    c1 := symbol c1;
+    c2 := symbol c2;
+    r1=SM.targetM1;
+    r2=SM.targetM3;
+    c1=SM.sourceM1;
+    c2=SM.sourceM2;
+    Minor11 := submatrix(SM.supermatrix, {0..(r1 - 1)}, {0..(c1 - 1)});
+    Minor22 := submatrix(SM.supermatrix, {r1..(r1 + r2 - 1)}, {c1..(c1 + c2 - 1)});
+    Minor21 := submatrix(SM.supermatrix, {r1..(r1 + r2 - 1)}, {0..(c1 - 1)});
+    Minor12 := submatrix(SM.supermatrix, {0..(r1 - 1)}, {c1..(c1 + c2 - 1)});
+    if isSkewSymmetric(R1)==true then
+    (fij := symbol fij;
+     count1:= symbol count1;
+     count1=0;
+     count12:=symbol count12;
+     count12=0;
+     count2:=symbol count2;
+     count2=0;
+     count22:=symbol count22;
+     count22=0;
+     count3:=symbol count3;
+     count3=0;
+     count33:=symbol count33;
+     count33=0;
+     count4:=symbol count4;
+     count4=0;
+     count44:=symbol count44;
+     count44=0;
+   for i from 0 to (r1-1) do for j from 0 to (c1-1)
+	do(fij = Minor11_(i,j);
+	    if (isSuperHomogeneous(fij,R1,a)==true) then
+	       (if (isEven(fij,R1,a)==false) then 
+	           count1 = count1+1
+	           else count1 = count1)
+	       else count12 = count12+1);
+	    if count12 =!= 0 then (return false) else if count1 == 0 then m1= 0 else m1=1;
+	for i from 0 to (r1-1) do for j from 0 to (c2-1)
+	do(fij = Minor12_(i,j);
+	    if isSuperHomogeneous(fij,R1,a)==true then
+	    (if (isEven(fij,R1,a)==false)
+		then count2 = count2+1
+		else count2 = count2)
+	   else count22=count22+1);
+	   if count22=!=0 then (return false) else if count2 ==0 then m2=0 else m2=1;
+       for i from 0 to (r2-1) do for j from 0 to (c1-1)
+       do(fij = Minor21_(i,j);
+	   if isSuperHomogeneous(fij,R1,a)==true then
+	    (if(isEven(fij,R1,a)==false)
+		then count3 = count3+1
+		else count3 = count3)
+	   else count33=count33+1);
+	   if count33=!=0 then (return false)  else if count3==0 then m3=0 else m3=1;
+       for i from 0 to (r2-1) do for j from 0 to (c2-1)
+       do(fij = Minor22_(i,j);
+	   if isSuperHomogeneous(fij,R1,a)==true then
+	    (if(isEven(fij,R1,a)==false)
+		then count4 = count4+1
+		else count4 = count4)
+	   else cout44=count44+1);
+	  if count44=!=0 then (return false) else if count4==0 then m4=0 else m4=1;
+      R2 = coefficientRing R1;
+      if (isSkewSymmetric(R2)==true) then(
+       if (m1==0 and m4==0 and m2==1 and m3==1)then true
+       else if (m1==1 and m4==1 and m2==0 and m3==0) then  true else false)
+       else if (m1==0 and m4==0 and m2==1 and m3==1) then 
+        true else if (m1==1 and m4==1 and m2==0 and m3==0) then
+        true else false
+	)
+    else (print "Ring is not superRing and everything is superHomogeneouse",return true)
+)
+
+TEST///
+R1 = QQ[x_0..x_3]
+R2 = QQ[z_0..z_2]
+R = superRing(r1,r2)
+T1 = r[n_0..n_3]
+T2 = r[e_0..e_3]
+T = superRing(t1,t2)
+M1 = matrix{{n_0,n_1},{n_2,n_3}}
+M2 = matrix{{e_0,e_1},{n_0*e_0,n_1*e_1}}
+M3 = matrix{{e_3*n_3,e_1},{e_0,e_2*n_2}}
+M4 = matrix{{n_1,n_3},{n_0,n_2+n_3}}
+SM = superMatrix(M1,M2,M3,M4)
+assert(isSuperMatrixHomogeneous(SM,t,{e_0,e_1,e_2,e_3})==true)
+---
+E1 = matrix{{e_0,n_1},{n_2,n_3}}
+E2 = matrix{{e_0,e_1},{n_0+e_0,n_1*e_1}}
+E3 = matrix{{e_3*n_3,e_1},{e_0,e_2*n_2}}
+E4 = matrix{{n_1,n_3},{n_0,n_2+n_3}}
+G = superMatrix(e1,e2,e3,e4)
+assert(isSuperMatrixHomogeneous(G,t,{e_0,e_1,e_2,e_3})==true)
+///
 --------------------
 --Supertrace           
 --------------------  
@@ -146,7 +338,7 @@ assert(superTrace G == -21)
 
 --------------------
 --Berezinian
---------------------  -----------
+-------------------- 
 Berezinian = method();
 Berezinian (SuperMatrix,Ring) := (SM,R1) ->(
     Minor11 := submatrix(SM.supermatrix, {0..(SM.targetM1 - 1)}, {0..(SM.sourceM1 - 1)});
@@ -182,39 +374,6 @@ S5 = sub(S1,QQ)
 S6 = S4 - S3*inverse(S5)*S2
 F = superMatrix(S1,S2,S3,S4)
 assert(Berezinian(F,QQ) == det(S1)*det(inverse(S6)))
-///
-
---------------------
---isSuperHomogeneous  now work only for function 
---------------------  -----------
-isSuperHomogeneous = method(Options => {OddOrEven => null});
-isSuperHomogeneous (RingElement,Ring,List) := ZZ => opts -> (f,R,a) -> (
-    e := symbol e;
-    e = exponents f;
-    l := symbol l;
-    l={};
-    for i from 0 to (#gens R -1) do (for j from 0 to #a -1 do (if R_(i)==a_(j) then (l= append(l,i))));
-    d := symbol d;
-    countEvenNumber := symbol countEvenNumber; 
-    d=0; 
-    countEvenNumber =0; 
-    for i from 0 to (#e-1) do (if (d%2)==0 then countEvenNumber = countEvenNumber +1; d=0; for j from 0 to #l-1 do (if 1==(e_i)_(l_j) then (d = d + 1)));
-    d=0; for j from 0 to #l-1 do (if 1==(e_(#e-1))_(l_j) then (d = d + 1)); if (d%2)==0 then countEvenNumber = countEvenNumber +1; 
-    if opts.OddOrEven ===null then (if (countEvenNumber -1) == #e then true else if (countEvenNumber -1) == 0 then true else false) else (if (countEvenNumber -1) == #e then (print("Homogeneous and even");return 0) else if (countEvenNumber -1) == 0 then (print("Homogeneous and odd");return 1) else false) 
-    )  
-
-TEST ///
-R=QQ[x_0..x_4,y_0..y_1];
-a={y_0,y_1} ;
-g=x_1*x_2*x_3+4;
-f=x_1*x_2*x_3+x_1*y_0+y_1*y_0-4*x_2*y_1*y_0+4;
-h=y_0+y_0*x_0+y_1;
-assert(isSuperHomogeneous(f,R,a) == false)
-assert(isSuperHomogeneous(f,R,a,OddOrEven=>true) == false)
-assert(isSuperHomogeneous(g,R,a) == true)
-assert(isSuperHomogeneous(g,R,a,OddOrEven=>true) == 0)
-assert(isSuperHomogeneous(h,R,a) == true)
-assert(isSuperHomogeneous(h,R,a,OddOrEven=>true) == 1)
 ///
 
 ------------------------
@@ -265,41 +424,6 @@ G = superMatrix(M1,M2,M3,M4);
 assert(inverseSuperMatrix(G,QQ) == NM1 || NM2)
 ///
 
---------------------
---isSuperHomogeneous  now work only for function 
---------------------  -----------
-isSuperHomogeneous = method(Options => {OddOrEven => null});
-isSuperHomogeneous (RingElement,Ring,List) := ZZ => opts -> (f,R,a) -> (
-    e := symbol e;
-    e = exponents f;
-    l := symbol l;
-    l={};
-    for i from 0 to (#gens R -1) do (for j from 0 to #a -1 do (if R_(i)==a_(j) then (l= append(l,i))));
-    d := symbol d;
-    countEvenNumber := symbol countEvenNumber; 
-    d=0; 
-    countEvenNumber =0; 
-    for i from 0 to (#e-1) do (if (d%2)==0 then countEvenNumber = countEvenNumber +1; d=0; for j from 0 to #l-1 do (if 1==(e_i)_(l_j) then (d = d + 1)));
-    d=0; for j from 0 to #l-1 do (if 1==(e_(#e-1))_(l_j) then (d = d + 1)); if (d%2)==0 then countEvenNumber = countEvenNumber +1; 
-    if opts.OddOrEven ===null then (if (countEvenNumber -1) == #e then true else if (countEvenNumber -1) == 0 then true else false) else (if (countEvenNumber -1) == #e then (print("Homogeneous and even");return 0) else if (countEvenNumber -1) == 0 then (print("Homogeneous and odd");return 1) else false) 
-    )  
-
-TEST ///
-R1=QQ[x_0..x_4];
-R2=QQ[e_0,e_1];
-R= superRing(R1,R2)
-a={e_0,e_1}
-f=x_1*x_2*x_3+x_1*e_0+e_1*e_0-4*x_2*e_1*e_0+4
-isSuperHomogeneous(f,R,a)
-g=x_1*x_2*x_3+e_0*e_1+4;
-isSuperHomogeneous(g,R,a)
-assert(isSuperHomogeneous(f,R,a) == false)
-assert(isSuperHomogeneous(f,R,a,OddOrEven=>true) == false)
-assert(isSuperHomogeneous(g,R,a) == true)
-assert(isSuperHomogeneous(g,R,a,OddOrEven=>true) == 0)
-assert(isSuperHomogeneous(h,R,a) == true)
-assert(isSuperHomogeneous(h,R,a,OddOrEven=>true) == 1)
-///
 
 --------------------
 
@@ -349,7 +473,7 @@ doc ///
 Key 
   SuperMatrix
 Headline
-  Super matrix
+  Supermatrix
 Description
   Text
    Let $M_1,M_2,M_3,M_4$ are four matrices. 
