@@ -1,7 +1,7 @@
 newPackage(
   "SuperLinearAlgebra",
   Version => "0.1", 
-  Date => "29 July 2020",
+  Date => "29 January 2021",
   Authors => {
       {Name => "Fereshteh Bahadorykhalily", 
        Email => "f.bahadori.khalili@gmail.com", 
@@ -28,20 +28,20 @@ export {
    "isEven",
    "isOdd",
    "isSuperMatrixHomogeneous",
+   "isSuperMatrisEven",
+   "isSuperMatrixOdd",
+   "superTrace",
    "inverseSuperMatrix",
    "isSkewSymmetric",
-
-
+   
    --Types and keys 
    "SuperMatrix",
    "supermatrix", "targetM1", "targetM3", "sourceM1", "sourceM2",
-
-}
+ }
 
 --------------------------------------------------------------
 --SuperRing (Super commutative ring)  ### y(inverse) need work
 --------------------------------------------------------------
-
 superRing = method();
 superRing (PolynomialRing,PolynomialRing):= (R1,R2) -> (
          n := #gens R1;
@@ -63,8 +63,9 @@ superRing (PolynomialRing,PolynomialRing):= (R1,R2) -> (
 --This a is new mulitivariate Hash table with 5 keys.
 --supermatrix, targetM1, targetM3, sourceM1, sourceM2
 ------------------------------------------------
-
 SuperMatrix = new Type of MutableHashTable;
+--a SuperMatrix always has the following keys:
+-- supermatrix, targetM1, targetM3, sourceM1, sourceM2
 
 superMatrix = method();
 superMatrix (Matrix,Matrix,Matrix,Matrix):= (M1,M2,M3,M4) ->(
@@ -116,12 +117,12 @@ isSkewSymmetric Ring := (R1)->(
            )
 
 TEST ///
-r1 = QQ[x_0..x_3]
-r2 = QQ[z_0..z_2]
-r = superRing(r1,r2)
-assert(isSkewSymmetric r == true)
-R=QQ[x_0..x_5]
-assert(isSkewSymmetric R ==false)
+R1 = QQ[x_0..x_3]
+R2 = QQ[z_0..z_2]
+R = superRing(r1,r2)
+assert(isSkewSymmetric R == true)
+S=QQ[x_0..x_5]
+assert(isSkewSymmetric S ==false)
 ///
 
 
@@ -215,8 +216,8 @@ assert(isEven(h,R,a) == false)
 ------------------------------------
 --isSuperMatrixHomogeneous
 --------------------------------
-isSuperMatrixHomogeneous = method(Options=> {EvenOrOddMatrix=>null});
-isSuperMatrixHomogeneous(SuperMatrix,Ring,List) := ZZ => opts -> (SM,R1,a) ->(
+isSuperMatrixHomogeneous = method();
+isSuperMatrixHomogeneous(SuperMatrix,Ring,List) := (SM,R1,a) ->(
     m1 := symbol m1;
     m2 := symbol m2;
     m3 := symbol m3;
@@ -241,8 +242,8 @@ isSuperMatrixHomogeneous(SuperMatrix,Ring,List) := ZZ => opts -> (SM,R1,a) ->(
     (fij := symbol fij;
      count1:= symbol count1;
      count1=0;
-     count12:=symbol count12;
-     count12=0;
+     count11:=symbol count12;
+     count11=0;
      count2:=symbol count2;
      count2=0;
      count22:=symbol count22;
@@ -261,8 +262,8 @@ isSuperMatrixHomogeneous(SuperMatrix,Ring,List) := ZZ => opts -> (SM,R1,a) ->(
 	       (if (isEven(fij,R1,a)==false) then 
 	           count1 = count1+1
 	           else count1 = count1)
-	       else count12 = count12+1);
-	    if count12 =!= 0 then (return false) else if count1 == 0 then m1= 0 else m1=1;
+	       else count11 = count11+1);
+	    if count11 =!= 0 then (return false) else if count1 == 0 then m1= 0 else m1=1;
 	for i from 0 to (r1-1) do for j from 0 to (c2-1)
 	do(fij = Minor12_(i,j);
 	    if isSuperHomogeneous(fij,R1,a)==true then
@@ -295,30 +296,222 @@ isSuperMatrixHomogeneous(SuperMatrix,Ring,List) := ZZ => opts -> (SM,R1,a) ->(
         true else if (m1==1 and m4==1 and m2==0 and m3==0) then
         true else false
 	)
-    else (print "Ring is not superRing and everything is superHomogeneouse",return true)
+    else (error "Ring should be a superRing")
 )
 
 TEST///
 R1 = QQ[x_0..x_3]
 R2 = QQ[z_0..z_2]
-R = superRing(r1,r2)
-T1 = r[n_0..n_3]
-T2 = r[e_0..e_3]
-T = superRing(t1,t2)
+R = superRing(R1,R2)
+T1 = R[n_0..n_3]
+T2 = R[e_0..e_3]
+T = superRing(T1,T2)
 M1 = matrix{{n_0,n_1},{n_2,n_3}}
 M2 = matrix{{e_0,e_1},{n_0*e_0,n_1*e_1}}
 M3 = matrix{{e_3*n_3,e_1},{e_0,e_2*n_2}}
 M4 = matrix{{n_1,n_3},{n_0,n_2+n_3}}
 SM = superMatrix(M1,M2,M3,M4)
-assert(isSuperMatrixHomogeneous(SM,t,{e_0,e_1,e_2,e_3})==true)
+assert(isSuperMatrixHomogeneous(SM,T,{e_0,e_1,e_2,e_3})==true)
 ---
 E1 = matrix{{e_0,n_1},{n_2,n_3}}
 E2 = matrix{{e_0,e_1},{n_0+e_0,n_1*e_1}}
 E3 = matrix{{e_3*n_3,e_1},{e_0,e_2*n_2}}
 E4 = matrix{{n_1,n_3},{n_0,n_2+n_3}}
-G = superMatrix(e1,e2,e3,e4)
-assert(isSuperMatrixHomogeneous(G,t,{e_0,e_1,e_2,e_3})==true)
+G = superMatrix(E1,E2,E3,E4)
+assert(isSuperMatrixHomogeneous(G,T,{e_0,e_1,e_2,e_3})==false)
 ///
+
+-----------------------------------------
+--isSuperMatrixEven
+---------------------------------------
+isSuperMatrixEven = method();
+isSuperMatrixEven (SuperMatrix,Ring,List) :=(SM,R1,a)->(
+if (isSuperMatrixHomogeneous(SM,R1,a)==true) then
+   ( m1 := symbol m1;
+    m2 := symbol m2;
+    m3 := symbol m3;
+    m4 := symbol m4;
+    m1 = 0;
+    m2 = 0;
+    m3 = 0;
+    m4 = 0;
+    r1 := symbol r1;
+    r2 := symbol r2;
+    c1 := symbol c1;
+    c2 := symbol c2;
+    r1=SM.targetM1;
+    r2=SM.targetM3;
+    c1=SM.sourceM1;
+    c2=SM.sourceM2;
+    Minor11 := submatrix(SM.supermatrix, {0..(r1 - 1)}, {0..(c1 - 1)});
+    Minor22 := submatrix(SM.supermatrix, {r1..(r1 + r2 - 1)}, {c1..(c1 + c2 - 1)});
+    Minor21 := submatrix(SM.supermatrix, {r1..(r1 + r2 - 1)}, {0..(c1 - 1)});
+    Minor12 := submatrix(SM.supermatrix, {0..(r1 - 1)}, {c1..(c1 + c2 - 1)});
+    if isSkewSymmetric(R1)==true then
+    (fij := symbol fij;
+     count1:= symbol count1;
+     count1=0;
+     count2:=symbol count2;
+     count2=0;
+     count3:=symbol count3;
+     count3=0;
+     count4:=symbol count4;
+     count4=0;
+   for i from 0 to (r1-1) do for j from 0 to (c1-1)
+	do(fij = Minor11_(i,j);
+	   if (isEven(fij,R1,a)==false) then 
+	           count1 = count1+1
+	           else count1 = count1);
+	    if count1 == 0 then m1= 0 else m1=1;
+	for i from 0 to (r1-1) do for j from 0 to (c2-1)
+	do(fij = Minor12_(i,j);
+	    if (isEven(fij,R1,a)==false)
+		then count2 = count2+1
+		else count2 = count2);
+	   if count2 ==0 then m2=0 else m2=1;
+       for i from 0 to (r2-1) do for j from 0 to (c1-1)
+       do(fij = Minor21_(i,j);
+	   if(isEven(fij,R1,a)==false)
+		then count3 = count3+1
+		else count3 = count3);
+	   if count3==0 then m3=0 else m3=1;
+       for i from 0 to (r2-1) do for j from 0 to (c2-1)
+       do(fij = Minor22_(i,j);
+	   if(isEven(fij,R1,a)==false)
+		then count4 = count4+1
+		else count4 = count4);
+	  if count4==0 then m4=0 else m4=1;
+      R2 = coefficientRing R1;
+      if (isSkewSymmetric(R2)==true) then(
+       if (m1==0 and m4==0 and m2==1 and m3==1)then true
+       else if (m1==1 and m4==1 and m2==0 and m3==0) then  (print "superMatrix is odd", return false) else error "superMatrix is not homogeneous")
+       else if (m1==0 and m4==0 and m2==1 and m3==1) then 
+        true else if (m1==1 and m4==1 and m2==0 and m3==0) then
+        (print "superMatrix is odd",return false) else error "superMatrix is not homogeneous")
+    else (error "Ring should be a superRing")
+ )
+else (print "SuperMatrix is not superHomogeneous",return false)
+)
+
+TEST\\\
+R1 = QQ[x_0..x_3]
+R2 = QQ[z_0..z_2]
+R = superRing(R1,R2)
+T1 = R[n_0..n_3]
+T2 = R[e_0..e_3]
+T = superRing(T1,T2)
+M1 = matrix{{n_0,n_1},{n_2,n_3}}
+M2 = matrix{{e_0,e_1},{n_0*e_0,n_1*e_1}}
+M3 = matrix{{e_3*n_3,e_1},{e_0,e_2*n_2}}
+M4 = matrix{{n_1,n_3},{n_0,n_2+n_3}}
+SM = superMatrix(M1,M2,M3,M4)
+SM2 = superMatrix(M2,M1,M4,M3)
+assert(isSuperMatrixEven(SM,T,{e_0,e_1,e_2,e_3})==true)
+assert(isSuperMatrixEven(SM2,T,{e_0,e_1,e_2,e_3})==false)
+---
+E1 = matrix{{e_0,n_1},{n_2,n_3}}
+E2 = matrix{{e_0,e_1},{n_0+e_0,n_1*e_1}}
+E3 = matrix{{e_3*n_3,e_1},{e_0,e_2*n_2}}
+E4 = matrix{{n_1,n_3},{n_0,n_2+n_3}}
+G = superMatrix(E1,E2,E3,E4)
+assert(isSuperMatrixEven(G,T,{e_0,e_1,e_2,e_3})==false)
+\\\
+
+--------------------------------------
+---isSuperMatrixOdd
+--------------------------------------
+isSuperMatrixOdd = method();
+isSuperMatrixOdd (SuperMatrix,Ring,List) :=(SM,R1,a)->(
+if (isSuperMatrixHomogeneous(SM,R1,a)==true) then
+   (m1 := symbol m1;
+    m2 := symbol m2;
+    m3 := symbol m3;
+    m4 := symbol m4;
+    m1 = 0;
+    m2 = 0;
+    m3 = 0;
+    m4 = 0;
+    r1 := symbol r1;
+    r2 := symbol r2;
+    c1 := symbol c1;
+    c2 := symbol c2;
+    r1=SM.targetM1;
+    r2=SM.targetM3;
+    c1=SM.sourceM1;
+    c2=SM.sourceM2;
+    Minor11 := submatrix(SM.supermatrix, {0..(r1 - 1)}, {0..(c1 - 1)});
+    Minor22 := submatrix(SM.supermatrix, {r1..(r1 + r2 - 1)}, {c1..(c1 + c2 - 1)});
+    Minor21 := submatrix(SM.supermatrix, {r1..(r1 + r2 - 1)}, {0..(c1 - 1)});
+    Minor12 := submatrix(SM.supermatrix, {0..(r1 - 1)}, {c1..(c1 + c2 - 1)});
+    if isSkewSymmetric(R1)==true then
+    (fij := symbol fij;
+     count1:= symbol count1;
+     count1=0;
+     count2:=symbol count2;
+     count2=0;
+     count3:=symbol count3;
+     count3=0;
+     count4:=symbol count4;
+     count4=0;
+   for i from 0 to (r1-1) do for j from 0 to (c1-1)
+	do(fij = Minor11_(i,j);
+	   if (isEven(fij,R1,a)==false) then 
+	           count1 = count1+1
+	           else count1 = count1);
+	    if count1 == 0 then m1= 0 else m1=1;
+	for i from 0 to (r1-1) do for j from 0 to (c2-1)
+	do(fij = Minor12_(i,j);
+	   if (isEven(fij,R1,a)==false)
+		then count2 = count2+1
+		else count2 = count2);
+	   if count2 ==0 then m2=0 else m2=1;
+       for i from 0 to (r2-1) do for j from 0 to (c1-1)
+       do(fij = Minor21_(i,j);
+	  if(isEven(fij,R1,a)==false)
+		then count3 = count3+1
+		else count3 = count3);
+	  if count3==0 then m3=0 else m3=1;
+       for i from 0 to (r2-1) do for j from 0 to (c2-1)
+       do(fij = Minor22_(i,j);
+	  if(isEven(fij,R1,a)==false)
+		then count4 = count4+1
+		else count4 = count4);
+	  if count4==0 then m4=0 else m4=1;
+      R2 = coefficientRing R1;
+      if (isSkewSymmetric(R2)==true) then(
+       if (m1==0 and m4==0 and m2==1 and m3==1)then (print "superMatrix is even",return false)
+       else if (m1==1 and m4==1 and m2==0 and m3==0) then true else error "superMatrix is not homogeneous")
+       else if (m1==0 and m4==0 and m2==1 and m3==1) then 
+        (print "superMatrix is even",return false) else if (m1==1 and m4==1 and m2==0 and m3==0) then
+        true else error "superMatrix is not homogeneous")
+    else (error "Ring should be a superRing")
+ )
+else (print "SuperMatrix is not superHomogeneous",return false)
+)
+
+TEST\\\
+R1 = QQ[x_0..x_3]
+R2 = QQ[z_0..z_2]
+R = superRing(R1,R2)
+T1 = R[n_0..n_3]
+T2 = R[e_0..e_3]
+T = superRing(T1,T2)
+M1 = matrix{{n_0,n_1},{n_2,n_3}}
+M2 = matrix{{e_0,e_1},{n_0*e_0,n_1*e_1}}
+M3 = matrix{{e_3*n_3,e_1},{e_0,e_2*n_2}}
+M4 = matrix{{n_1,n_3},{n_0,n_2+n_3}}
+SM = superMatrix(M1,M2,M3,M4)
+SM2 = superMatrix(M2,M1,M4,M3)
+assert(isSuperMatrixOdd(SM,T,{e_0,e_1,e_2,e_3})==false)
+assert(isSuperMatrixOdd(SM2,T,{e_0,e_1,e_2,e_3})==true)
+---
+E1 = matrix{{e_0,n_1},{n_2,n_3}}
+E2 = matrix{{e_0,e_1},{n_0+e_0,n_1*e_1}}
+E3 = matrix{{e_3*n_3,e_1},{e_0,e_2*n_2}}
+E4 = matrix{{n_1,n_3},{n_0,n_2+n_3}}
+G = superMatrix(E1,E2,E3,E4)
+assert(isSuperMatrixEven(G,T,{e_0,e_1,e_2,e_3})==false)
+\\\
 --------------------
 --Supertrace           
 --------------------  
@@ -326,7 +519,11 @@ superTrace = method ();
 superTrace SuperMatrix :=(SM)->(
     Minor11 := submatrix(SM.supermatrix, {0..(SM.targetM1 -1)}, {0..(SM.sourceM1 -1)});
     Minor22 := submatrix(SM.supermatrix, {SM.targetM1..(SM.targetM1 + SM.targetM3 -1)}, {SM.sourceM1..(SM.sourceM1 + SM.sourceM2 -1)});
+    if (isSuperMatrixEven(SM)==true) then
     trace Minor11 - trace Minor22
+    else if (isSuperMatrixOdd(SM)==true) then
+    trace Minor11 + trace Minor22
+	else error "SuperMatrix is not superhomogeneous"
     )
 
 TEST ///
@@ -427,54 +624,6 @@ assert(inverseSuperMatrix(G,QQ) == NM1 || NM2)
 ///
 
 
-------------------------
---inversesupermatrix
-----------------------
-inverseSuperMatrix = method();
-inverseSuperMatrix (SuperMatrix,Ring) := (SM,R1) ->(
-    Minor11 := submatrix(SM.supermatrix, {0..(SM.targetM1 - 1)}, {0..(SM.sourceM1 - 1)});
-    Minor22 := submatrix(SM.supermatrix, {SM.targetM1..(SM.targetM1 + SM.targetM3 - 1)}, {SM.sourceM1..(SM.sourceM1 + SM.sourceM2 - 1)});
-    Minor12 := submatrix(SM.supermatrix, {SM.targetM1..(SM.targetM1 + SM.targetM3 - 1)}, {0..(SM.sourceM1 - 1)});
-    Minor21 := submatrix(SM.supermatrix, {0..(SM.targetM1 - 1)}, {SM.sourceM1..(SM.sourceM1 + SM.sourceM2 - 1)});
-    if numRows Minor11 =!= numColumns Minor11 then error "expected a square matrix";
-    if numRows Minor22 =!= numColumns Minor22 then error "expected a square matrix";    
-    SM11 := sub(Minor11,R1);
-    SM22 := sub(Minor22,R1);
-    SM12 := sub(Minor12,R1);
-    SM21 := sub(Minor21,R1);
-    Prod1 := SM22 - SM12*inverse(SM11)*SM21;
-    Prod2 := SM11 - SM21*inverse(SM22)*SM12;
-    Nminor11 := inverse(Prod2);
-    Nminor12 := -inverse(SM22)*SM12*inverse(Prod2);
-    Nminor21 := -inverse(SM11)*SM21*inverse(Prod1);
-    Nminor22 := inverse(Prod1);
-    NSM1 := Nminor11 | Nminor21;
-    NSM2 := Nminor12 | Nminor22;
-    if (det(SM11) =!= 0 and det (SM22) =!= 0) then NSM1 || NSM2 else error "The SuperMatrix is not invertible"
-    )
-
-TEST///
-M1 = matrix{{5,7},{1,2}};
-M2 = matrix{{1,2,3},{4,5,6}};
-M3 = matrix{{3,4},{5,6},{7,8}};
-M4 = matrix{{2,3,11},{4,5,6},{7,8,9}};
-M44 = sub(M4,QQ);
-M11 = sub(M1,QQ);
-M22 = sub(M2,QQ);
-M33 = sub(M3,QQ);
-P2 = M44 - M33*inverse(M11)*M22;
-P1 = M11 - M22*inverse(M44)*M33;
-N11 = inverse(P1);
-N12 = -inverse(M44)*M33*inverse(P1);
-N21 = -inverse(M11)*M22*inverse(P2);
-N22 = inverse(P2);
-NM1 = N11 | N21;
-NM2 = N12 | N22;
-G = superMatrix(M1,M2,M3,M4);
-assert(inverseSuperMatrix(G,QQ) == NM1 || NM2)
-///
-
-
 --------------------
 
 
@@ -525,6 +674,7 @@ Key
 Headline
   Supermatrix
 Description
+  Text
    Let $M_1,M_2,M_3,M_4$ are four matrices. 
    The number of rows in $M_1$ and $M_2$,
    and those of $M_3$ and $M_4$ should be equal.
@@ -545,6 +695,7 @@ Description
    The key targetM3 shows the number of the rows of the second part
    The key sourceM1 shows the number of columns in the first part
    The key sourceM2 shows the number of columns in the second part.
+
  Example
     M1 = matrix {{1,2},{5,6},{9,10}}
     M2 = matrix {{3,4},{7,8},{11,12}}
@@ -575,6 +726,7 @@ Description
 Caveat
 SeeAlso
 ///
+
 
 doc ///
 Key 
@@ -612,6 +764,7 @@ Key
 Headline
   isSuperHomogeneous
 Description
+  Text
   Let we have a super algebra (ring), $R=R_0\oplus R_1$.
   A homogeneous element of $R$ is an element belongs to $R_0$ or $R_1$.
   If $x\in R_0$, we say $x$ is even, and if $x\in R_1$, we say $x$ is odd.
@@ -636,6 +789,7 @@ Key
 Headline
   InverseSuperMatrix
 Description
+  Text
   A super Matrix $M=\begin{bmatrix}M_1 & M_2 \\ M_3 & M_4   \end{bmatrix}$
   is invertible, if both the diagonal blocks, $M_1$ and $M_4$ are invertible.
   In this case, the inverse is given by a blocked matrix,
@@ -645,6 +799,7 @@ Description
   $T_2=−M^{-1}_1 M_2(M_4 − M_3M^{-1}_1 M_2)^{-1}$,
   $T_3=−M^{-1}_4 M_3(M_1 − M_2M^{-1}_4 M_3)^{-1}$, and
   $T_4=(M_4 − M_3M^{-1}_1 M_2)^{-1}$.
+
  Example
     M1 = matrix{{5,7},{1,2}};
     M2 = matrix{{1,2,3},{4,5,6}};
