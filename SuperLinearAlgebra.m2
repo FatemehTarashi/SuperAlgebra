@@ -190,6 +190,7 @@ assert(Berezinian(F,QQ) == det(S1)*det(inverse(S6)))
 --------------------  ----------- 
 Parity = method();
 Parity (RingElement,Ring,List) := (f,R,a) -> (
+    if f == 0 then return 0;
     e := symbol e;
     e = exponents f;
     l := symbol l;
@@ -495,3 +496,23 @@ G = superMatrix(M1,M2,M3,M4)
 superTrace G 
 
 viewHelp SuperLinearAlgebra
+
+R1 = QQ[x_0..x_3]
+R2 = QQ[z_0,z_1]
+R = superRing(R1,R2)
+a={z_0,z_1} ;
+g=x_1*x_2*x_3+4;
+f=x_1*x_2*x_3+x_1*z_0+z_1*z_0-4*x_2*z_1*z_0+4;
+h=z_0+z_0*x_0+z_1;
+assert(Parity(f,R,a) == -1)
+assert(Parity(g,R,a) == 0)
+assert(Parity(h,R,a) == 1)
+assert(Parity(1+2.5*ii,R,a) == 0)
+P1 = matrix{{0,0},{0,0}}
+P2 = matrix{{x_0,x_1},{x_2,x_3}}
+P3 = matrix{{x_1,x_2},{x_0,x_1}}
+P4 = matrix{{0,0},{0,0}} 
+SP = superMatrix(P1,P2,P3,P4)
+SS = SP.supermatrix
+Parity(SS_(0,0),R,{z_0})
+
