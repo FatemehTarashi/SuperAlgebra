@@ -25,7 +25,7 @@ export {
    "superTrace",
    "Berezinian",
    "isSkewSymmetric",
-   "isSuperHomogeneous",
+   "Parity",
    "inverseSuperMatrix",
 
    --Types and keys 
@@ -188,8 +188,8 @@ assert(Berezinian(F,QQ) == det(S1)*det(inverse(S6)))
 --------------------
 --isSuperHomogeneous  now work only for function 
 --------------------  ----------- 
-isSuperHomogeneous = method(Options => {OddOrEven => null});
-isSuperHomogeneous (RingElement,Ring,List) := ZZ => opts -> (f,R,a) -> (
+Parity = method();
+Parity (RingElement,Ring,List) := (f,R,a) -> (
     e := symbol e;
     e = exponents f;
     l := symbol l;
@@ -201,8 +201,12 @@ isSuperHomogeneous (RingElement,Ring,List) := ZZ => opts -> (f,R,a) -> (
     countEvenNumber =0; 
     for i from 0 to (#e-1) do (if (d%2)==0 then countEvenNumber = countEvenNumber +1; d=0; for j from 0 to #l-1 do (if 1==(e_i)_(l_j) then (d = d + 1)));
     d=0; for j from 0 to #l-1 do (if 1==(e_(#e-1))_(l_j) then (d = d + 1)); if (d%2)==0 then countEvenNumber = countEvenNumber +1; 
-    if opts.OddOrEven ===null then (if (countEvenNumber -1) == #e then true else if (countEvenNumber -1) == 0 then true else false) else (if (countEvenNumber -1) == #e then 0 else if (countEvenNumber -1) == 0 then 1 else -1) 
-    )  
+    if (countEvenNumber -1) == #e then 0 else if (countEvenNumber -1) == 0 then 1 else -1
+    ) 
+
+Parity (Number,Ring,List) := (f,R,a) -> (
+    0
+    ) 
 
 TEST ///
 R=QQ[x_0..x_4,y_0..y_1];
@@ -210,12 +214,10 @@ a={y_0,y_1} ;
 g=x_1*x_2*x_3+4;
 f=x_1*x_2*x_3+x_1*y_0+y_1*y_0-4*x_2*y_1*y_0+4;
 h=y_0+y_0*x_0+y_1;
-assert(isSuperHomogeneous(f,R,a) == false)
-assert(isSuperHomogeneous(f,R,a,OddOrEven=>true) == -1)
-assert(isSuperHomogeneous(g,R,a) == true)
-assert(isSuperHomogeneous(g,R,a,OddOrEven=>true) == 0)
-assert(isSuperHomogeneous(h,R,a) == true)
-assert(isSuperHomogeneous(h,R,a,OddOrEven=>true) == 1)
+assert(Parity(f,R,a) == -1)
+assert(Parity(g,R,a) == 0)
+assert(Parity(h,R,a) == 1)
+assert(Parity(1+2.5*ii,R,a) == 0)
 ///
 
 
@@ -399,9 +401,9 @@ SeeAlso
 
 doc ///
 Key 
-  isSuperHomogeneous
+  Parity
 Headline
-  isSuperHomogeneous
+  Parity
 Description
  Text
   Let we have a super algebra (ring), R=R_0 oplus R_1.
@@ -414,9 +416,9 @@ Description
     R= superRing(R1,R2)
     a={e_0,e_1}
     f=x_1*x_2*x_3+x_1*e_0+e_1*e_0-4*x_2*e_1*e_0+4
-    isSuperHomogeneous(f,R,a)
+    Parity(f,R,a)
     g=x_1*x_2*x_3+e_0*e_1+4;
-    isSuperHomogeneous(g,R,a)
+    Parity(g,R,a)
 Caveat
 SeeAlso
 ///
