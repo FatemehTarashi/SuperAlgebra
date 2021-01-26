@@ -24,11 +24,9 @@ export {
    "superMatrix",
    "superTrace",
    "Berezinian",
+   "isSkewSymmetric",
    "Parity",
    "SuperMatrixParity",
-   "superTrace",
-   "inverseSuperMatrix",
-   "isSkewSymmetric",
    
    --Types and keys 
    "SuperMatrix",
@@ -360,9 +358,47 @@ F = superMatrix(S1,S2,S3,S4)
 assert(Berezinian(F,QQ) == det(S1)*det(inverse(S6)))
 ///
 
+
+--------------------
+--isSuperHomogeneous  now work only for function 
+--------------------  ----------- 
+Parity = method();
+Parity (RingElement,Ring,List) := (f,R,a) -> (
+    if f == 0 then return 0;
+    e := symbol e;
+    e = exponents f;
+    l := symbol l;
+    l={};
+    for i from 0 to (#gens R -1) do (for j from 0 to #a -1 do (if R_(i)==a_(j) then (l= append(l,i))));
+    d := symbol d;
+    countEvenNumber := symbol countEvenNumber; 
+    d=0; 
+    countEvenNumber =0; 
+    for i from 0 to (#e-1) do (if (d%2)==0 then countEvenNumber = countEvenNumber +1; d=0; for j from 0 to #l-1 do (if 1==(e_i)_(l_j) then (d = d + 1)));
+    d=0; for j from 0 to #l-1 do (if 1==(e_(#e-1))_(l_j) then (d = d + 1)); if (d%2)==0 then countEvenNumber = countEvenNumber +1; 
+    if (countEvenNumber -1) == #e then 0 else if (countEvenNumber -1) == 0 then 1 else -1
+    ) 
+
+Parity (Number,Ring,List) := (f,R,a) -> (
+    0
+    ) 
+
+TEST ///
+R=QQ[x_0..x_4,y_0..y_1];
+a={y_0,y_1} ;
+g=x_1*x_2*x_3+4;
+f=x_1*x_2*x_3+x_1*y_0+y_1*y_0-4*x_2*y_1*y_0+4;
+h=y_0+y_0*x_0+y_1;
+assert(Parity(f,R,a) == -1)
+assert(Parity(g,R,a) == 0)
+assert(Parity(h,R,a) == 1)
+assert(Parity(1+2.5*ii,R,a) == 0)
+///
+
+
 ------------------------
 --inversesupermatrix
-----------------------
+---------------------- 
 inverseSuperMatrix = method();
 inverseSuperMatrix (SuperMatrix,Ring) := (SM,R1) ->(
     Minor11 := submatrix(SM.supermatrix, {0..(SM.targetM1 - 1)}, {0..(SM.sourceM1 - 1)});
@@ -386,7 +422,6 @@ inverseSuperMatrix (SuperMatrix,Ring) := (SM,R1) ->(
     if (det(SM11) =!= 0 and det (SM22) =!= 0) then NSM1 || NSM2 else error "The SuperMatrix is not invertible"
     )
 
-
 TEST///
 M1 = matrix{{5,7},{1,2}};
 M2 = matrix{{1,2,3},{4,5,6}};
@@ -408,16 +443,14 @@ G = superMatrix(M1,M2,M3,M4);
 assert(inverseSuperMatrix(G,QQ) == NM1 || NM2)
 ///
 
-
 --------------------
-
 
 beginDocumentation()
 
 doc ///
 Key
   SuperLinearAlgebra
-Headline
+Headline 
   Package for super algebra
 Description
   Text
@@ -426,6 +459,7 @@ Caveat
 SeeAlso
 ///
 
+
 doc ///
 Key
   superRing
@@ -433,14 +467,14 @@ Headline
   Super ring
 Description
   Text
-    Let $R_1$ and $R_2$ be Two Polynomial rings on different set of variables
+    Let R_1 and R_2 be Two Polynomial rings on different set of variables
     A superRing is a new polynomial ring with three sets of variables. 
-    One set comes from $R_1$ and the second one is the inverse of it.
-    For example, if we have $x$ as a variable in $R_1$,
-    then there is a new variable, say $y_0$ which is the inverse of $x$.
-    The third set of variables comes from $R_2$.
+    One set comes from R_1 and the second one is the inverse of it.
+    For example, if we have x as a variable in R_1,
+    then there is a new variable, say y_0 which is the inverse of $x$.
+    The third set of variables comes from R_2.
     We redefine this set to be a set of skew-symmetric variables.
-    So superRing of $R_1$ and $R_2$ is a quotient ring,
+    So superRing of R_1 and R_2 is a quotient ring,
     which has both invertible and skew symmetric variables.
     If the coefficient ring a a field, then we get a super algebra.
 
@@ -460,21 +494,20 @@ Headline
   Supermatrix
 Description
   Text
-   Let $M_1,M_2,M_3,M_4$ are four matrices. 
-   The number of rows in $M_1$ and $M_2$,
-   and those of $M_3$ and $M_4$ should be equal.
-   Also, the number of columns of $M_1$ and $M_3$,
-   and those of $M_2$ and $M_4$ must be equal.
+   Let M_1,M_2,M_3,M_4 are four matrices. 
+   The number of rows in M_1 and M_2,
+   and those of M_3 and M_4 should be equal.
+   Also, the number of columns of M_1 and M_3,
+   and those of M_2 and M_4 must be equal.
    The idea is to define a (super) Matrix,
-   which can be considered as $p|q\times r|s$ matrix.
+   which can be considered as p|q\times r|s matrix.
    This super Matrix can be a morphism between super
-   modules $A^{p|q}$ and $A^{r|s}$ over super algebra $A$. 
+   modules A^{p|q} and A^{r|s} over super algebra A. 
 
-   The function merges the matrices $M_1$ and $M_2$, and also $M_3$ and $M_4$. 
+   The function merges the matrices M_1 and M_2, and also M_3 and M_4. 
    Finally it merges two new matrices and 
    make a new matrix with the first four matrices as
-   the blocks of the new matrix, say $\begin{bmatrix}M_1 & M_2 \\
-   M_3 & M_4   \end{bmatrix}$.
+   the blocks of the new matrix, say matrix {M_1, M_2, M_3,M_4}.
    The key supermatrix shows the result matrix created as above.
    The key targetM1 shows the number of first part rows.
    The key targetM3 shows the number of the rows of the second part
@@ -519,17 +552,17 @@ Key
 Headline
   Berezinian
 Description
-  Text
+ Text
   If in a super Matrix, one of the first or the second diagonal block is invertible,
   then we can define Berezinian (as a kind of super Determinant).
   The formula for the Berezinian is different base on which block is invertible.
   But it is shown that the two formulas are equivalent if two blocks are invertible.
-  If $M=\begin{bmatrix}M_1 & M_2 \\ M_3 & M_4   \end{bmatrix}$ is a super Matrix, and
-  $M_4$ is invertible, then 
-  $Ber(M)= \det(M_1-M_2M^{-1}_4M_3)\det(M_4)^{-1}$.
+  If M= matrix {M_1 , M_2, M_3 , M_4} is a super Matrix, and
+  M_4 is invertible, then 
+  Ber(M)= det(M_1-M_2M^{-1}_4M_3) det(M_4)^{-1}.
   
-  If $M_1$ is invertible, then 
-  $ Ber(M) = det(M_4-M_3M_1^{-1}M_2)^{-1}\det(M_1)$.
+  If M_1 is invertible, then
+  Ber(M) = det(M_4-M_3M_1^{-1}M_2)^{-1} det(M_1).
  Example
     M1 = matrix{{5,7},{1,2}}
     M2 = matrix{{1,2,3},{4,5,6}}
@@ -545,14 +578,14 @@ SeeAlso
 
 doc ///
 Key 
-  isSuperHomogeneous
+  Parity
 Headline
-  isSuperHomogeneous
+  Parity
 Description
-  Text
-  Let we have a super algebra (ring), $R=R_0\oplus R_1$.
-  A homogeneous element of $R$ is an element belongs to $R_0$ or $R_1$.
-  If $x\in R_0$, we say $x$ is even, and if $x\in R_1$, we say $x$ is odd.
+ Text
+  Let we have a super algebra (ring), R=R_0 oplus R_1.
+  A homogeneous element of R is an element belongs to R_0 or R_1.
+  If x in R_0, we say x is even, and if x in R_1 , we say x is odd.
 
  Example
     R1=QQ[x_0..x_4];
@@ -560,9 +593,9 @@ Description
     R= superRing(R1,R2)
     a={e_0,e_1}
     f=x_1*x_2*x_3+x_1*e_0+e_1*e_0-4*x_2*e_1*e_0+4
-    isSuperHomogeneous(f,R,a)
+    Parity(f,R,a)
     g=x_1*x_2*x_3+e_0*e_1+4;
-    isSuperHomogeneous(g,R,a)
+    Parity(g,R,a)
 Caveat
 SeeAlso
 ///
@@ -574,18 +607,17 @@ Key
 Headline
   InverseSuperMatrix
 Description
-  Text
-  A super Matrix $M=\begin{bmatrix}M_1 & M_2 \\ M_3 & M_4   \end{bmatrix}$
-  is invertible, if both the diagonal blocks, $M_1$ and $M_4$ are invertible.
+ Text
+  A super Matrix M=matrix{M_1, M_2, M_3, M_4}
+  is invertible, if both the diagonal blocks, M_1 and M_4 are invertible.
   In this case, the inverse is given by a blocked matrix,
-  $T=\begin{bmatrix}T_1 & T_2 \\ T_3 & T_4   \end{bmatrix}$, where
-  
-  $T_1=(M_1 − M_2M^{-1}_4 M_3)^{-1}$,
-  $T_2=−M^{-1}_1 M_2(M_4 − M_3M^{-1}_1 M_2)^{-1}$,
-  $T_3=−M^{-1}_4 M_3(M_1 − M_2M^{-1}_4 M_3)^{-1}$, and
-  $T_4=(M_4 − M_3M^{-1}_1 M_2)^{-1}$.
-
+  T=matrix{T_1, T_2, T_3, T_4}, where
+  T_1=(M_1 − M_2M^{-1}_4 M_3)^{-1},
+  T_2=−M^{-1}_1 M_2(M_4 − M_3M^{-1}_1 M_2)^{-1},
+  T_3=−M^{-1}_4 M_3(M_1 − M_2M^{-1}_4 M_3)^{-1}, and
+  T_4=(M_4 − M_3M^{-1}_1 M_2)^{-1}.
  Example
+    test
     M1 = matrix{{5,7},{1,2}};
     M2 = matrix{{1,2,3},{4,5,6}};
     M3 = matrix{{3,4},{5,6},{7,8}};
@@ -623,7 +655,7 @@ end
 --Example
 restart
 --path={"/home/feri/Documents/SuperLinearAlgebra"}|path 
-path={"Desktop/SuperAlgebra/SuperLinearAlgebra"}|path
+path={"/home/ftk/Desktop/SuperAlgebra/SuperLinearAlgebra.m2"}|path
 
 loadPackage("SuperLinearAlgebra",Reload=>true)
 debug (SuperLinearAlgebra)
@@ -639,3 +671,23 @@ G = superMatrix(M1,M2,M3,M4)
 superTrace G 
 
 viewHelp SuperLinearAlgebra
+
+R1 = QQ[x_0..x_3]
+R2 = QQ[z_0,z_1]
+R = superRing(R1,R2)
+a={z_0,z_1} ;
+g=x_1*x_2*x_3+4;
+f=x_1*x_2*x_3+x_1*z_0+z_1*z_0-4*x_2*z_1*z_0+4;
+h=z_0+z_0*x_0+z_1;
+assert(Parity(f,R,a) == -1)
+assert(Parity(g,R,a) == 0)
+assert(Parity(h,R,a) == 1)
+assert(Parity(1+2.5*ii,R,a) == 0)
+P1 = matrix{{0,0},{0,0}}
+P2 = matrix{{x_0,x_1},{x_2,x_3}}
+P3 = matrix{{x_1,x_2},{x_0,x_1}}
+P4 = matrix{{0,0},{0,0}} 
+SP = superMatrix(P1,P2,P3,P4)
+SS = SP.supermatrix
+Parity(SS_(0,0),R,{z_0})
+
