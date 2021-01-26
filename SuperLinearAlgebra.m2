@@ -1,7 +1,7 @@
 newPackage(
   "SuperLinearAlgebra",
   Version => "0.1", 
-  Date => "29 July 2020",
+  Date => "29 January 2021",
   Authors => {
       {Name => "Fereshteh Bahadorykhalily", 
        Email => "f.bahadori.khalili@gmail.com", 
@@ -26,20 +26,16 @@ export {
    "Berezinian",
    "isSkewSymmetric",
    "Parity",
-   "inverseSuperMatrix",
-
+   "SuperMatrixParity",
+   
    --Types and keys 
    "SuperMatrix",
    "supermatrix", "targetM1", "targetM3", "sourceM1", "sourceM2",
-   
-   --option
-   "OddOrEven"
  }
 
 --------------------------------------------------------------
 --SuperRing (Super commutative ring)  ### y(inverse) need work
 --------------------------------------------------------------
-
 superRing = method();
 superRing (PolynomialRing,PolynomialRing):= (R1,R2) -> (
          n := #gens R1;
@@ -56,16 +52,14 @@ superRing (PolynomialRing,PolynomialRing):= (R1,R2) -> (
          R111**R22
          )    
 
-TEST ///
-
-/// 
 ------------------------------------------------------
 --SuperMatrix
 --This a is new mulitivariate Hash table with 5 keys.
 --supermatrix, targetM1, targetM3, sourceM1, sourceM2
 ------------------------------------------------
-
 SuperMatrix = new Type of MutableHashTable;
+--a SuperMatrix always has the following keys:
+-- supermatrix, targetM1, targetM3, sourceM1, sourceM2
 
 superMatrix = method();
 superMatrix (Matrix,Matrix,Matrix,Matrix):= (M1,M2,M3,M4) ->(
@@ -100,7 +94,6 @@ assert(G.sourceM1 == 2)
 assert(G.sourceM2 == 2)
 ///
 
-
 ---------------------------------------------------
 --isSkewSymmetric            --For Polynomial Rings
 --------------------------------------------------
@@ -118,36 +111,216 @@ isSkewSymmetric Ring := (R1)->(
            )
 
 TEST ///
-r1 = QQ[x_0..x_3]
-r2 = QQ[z_0..z_2]
-r = superRing(r1,r2)
-assert(isSkewSymmetric r == true)
-R=QQ[x_0..x_5]
-assert(isSkewSymmetric R ==false)
+R1 = QQ[x_0..x_3]
+R2 = QQ[z_0..z_2]
+R = superRing(r1,r2)
+assert(isSkewSymmetric R == true)
+S=QQ[x_0..x_5]
+assert(isSkewSymmetric S ==false)
 ///
 
+
+--------------------
+--isSuperHomogeneous  now work only for function 
+--------------------  -----------
+Parity = method();
+Parity (RingElement,Ring,List) := (f,R,a) -> (
+    e := symbol e;
+    e = exponents f;
+    l := symbol l;
+    l={};
+    for i from 0 to (#gens R -1) do (for j from 0 to #a -1 do (if R_(i)==a_(j) then (l= append(l,i))));
+    d := symbol d;
+    countEvenNumber := symbol countEvenNumber; 
+    d=0; 
+    countEvenNumber =0; 
+    for i from 0 to (#e-1) do (if (d%2)==0 then countEvenNumber = countEvenNumber +1; d=0; for j from 0 to #l-1 do (if 1==(e_i)_(l_j) then (d = d + 1)));
+    d=0; for j from 0 to #l-1 do (if 1==(e_(#e-1))_(l_j) then (d = d + 1)); if (d%2)==0 then countEvenNumber = countEvenNumber +1; 
+    if (countEvenNumber -1) == #e then 0 else if (countEvenNumber -1) == 0 then 1 else -1
+    ) 
+
+Parity (Number,Ring,List) := (f,R,a) -> (
+    0
+    ) 
+
+TEST ///
+R1 = QQ[x_0..x_3]
+R2 = QQ[z_0,z_1]
+R = superRing(R1,R2)
+a={z_0,z_1} ;
+g=x_1*x_2*x_3+4;
+f=x_1*x_2*x_3+x_1*z_0+z_1*z_0-4*x_2*z_1*z_0+4;
+h=z_0+z_0*x_0+z_1;
+assert(Parity(f,R,a) == -1)
+assert(Parity(g,R,a) == 0)
+assert(Parity(h,R,a) == 1)
+assert(Parity(1+2.5*ii,R,a) == 0)
+P1 = matrix{{0,0},{0,0}}
+P2 = matrix{{x_0,x_1},{x_2,x_3}}
+P3 = matrix{{x_1,x_2},{x_0,x_1}}
+P4 = matrix{{0,0},{0,0}} 
+SP = superMatrix(P1,P2,P3,P4)
+SS = SP.supermatrix
+t = SS_(0,0)
+Parity(0,R,{z_0})
+///
+----------------------------------
+--SuperMatrixParity
+--------------------------------
+SuperMatrixParity = method();
+SuperMatrixParity(SuperMatrix,Ring,List) := (SM,R1,a) ->(
+    m1 := symbol m1;
+    m2 := symbol m2;
+    m3 := symbol m3;
+    m4 := symbol m4;
+    m1 = 0;
+    m2 = 0;
+    m3 = 0;
+    m4 = 0;
+    r1 := symbol r1;
+    r2 := symbol r2;
+    c1 := symbol c1;
+    c2 := symbol c2;
+    r1=SM.targetM1;
+    r2=SM.targetM3;
+    c1=SM.sourceM1;
+    c2=SM.sourceM2;
+    Minor11 := submatrix(SM.supermatrix, {0..(r1 - 1)}, {0..(c1 - 1)});
+    Minor22 := submatrix(SM.supermatrix, {r1..(r1 + r2 - 1)}, {c1..(c1 + c2 - 1)});
+    Minor21 := submatrix(SM.supermatrix, {r1..(r1 + r2 - 1)}, {0..(c1 - 1)});
+    Minor12 := submatrix(SM.supermatrix, {0..(r1 - 1)}, {c1..(c1 + c2 - 1)});
+    if isSkewSymmetric(R1)==true then
+    (fij := symbol fij;
+     count1:= symbol count1;
+     count1=0;
+     count11:=symbol count12;
+     count11=0;
+     count2:=symbol count2;
+     count2=0;
+     count22:=symbol count22;
+     count22=0;
+     count3:=symbol count3;
+     count3=0;
+     count33:=symbol count33;
+     count33=0;
+     count4:=symbol count4;
+     count4=0;
+     count44:=symbol count44;
+     count44=0;
+   for i from 0 to (r1-1) do for j from 0 to (c1-1)
+	do(fij = Minor11_(i,j);
+	    if fij==0 then count1 = count1 else
+	    if (Parity(fij,R1,a)==-1) then (count11 = count11 +1) else
+	       if (Parity(fij,R1,a)==1) then 
+	           count1 = count1+1
+	           else if (Parity(fij,R1,a)==0) then count1 = count1);
+	      if count11=!=0 then (return -1)else if count1 == 0 then m1= 0 else m1=1;
+	for i from 0 to (r1-1) do for j from 0 to (c2-1)
+	do(fij = Minor12_(i,j);
+	    if fij==0 then count2 = count2 else
+	   if (Parity(fij,R1,a)==-1) then (count22 = count22 + 1) else
+	    if (Parity(fij,R1,a)==1)then count2 = count2+1
+		else if (Parity(fij,R1,a)==0) then count2 = count2);
+	   if count22=!=0 then (return -1) else if count2==0 then m2=0 else m2=1;
+       for i from 0 to (r2-1) do for j from 0 to (c1-1)
+       do(fij = Minor21_(i,j);
+	   if fij==0 then count3 = count3 else
+	   if (Parity(fij,R1,a)==-1) then (cout33=count33+1) else
+	     if (Parity(fij,R1,a)==1)then count3 = count3+1
+		else if (Parity(fij,R1,a)==0) then count3 = count3);
+	   if count33=!=0 then (return -1) else if count3==0 then m3=0 else m3=1;
+       for i from 0 to (r2-1) do for j from 0 to (c2-1)
+       do(fij = Minor22_(i,j);
+	   if fij==0 then count4 = count4 else
+	   if (Parity(fij,R1,a)==-1) then (cout44=count44+1) else
+	   if (Parity(fij,R1,a)==1)then count4 = count4+1
+		else if (Parity(fij,R1,a)==0) then count4 = count4);
+	  if count44=!=0 then (return -1) else if count4==0 then m4=0 else m4=1;
+      R2 = coefficientRing R1;
+      if (isSkewSymmetric(R2)==true) then(
+       if (m1==0 and m4==0 and m2==1 and m3==1)then ( return 0)
+       else if (m1==1 and m4==1 and m2==0 and m3==0) then (return 1) else (return -1))
+       else(
+        if (m1==0 and m4==0 and Minor12==0 and Minor21==0) then  (return 0)
+       else if (Minor11==0 and Minor22==0 and m2==0 and m3==0) then (return 1)
+       else (return -1))
+   )
+    else (error "Ring should be a superRing")
+)
+
+TEST///
+R1 = QQ[x_0..x_3]
+R2 = QQ[z_0..z_2]
+R = superRing(R1,R2)
+D1 = matrix{{x_0,x_1},{x_2,x_3}}
+D2 = matrix{{z_0,z_1},{x_0*z_0,x_1*z_1}}
+D3 = matrix{{z_2*x_3,z_1},{z_0,z_2*x_2}}
+D4 = matrix{{x_1,x_3},{x_0,x_2+x_3}} 
+SD = superMatrix(D1,D2,D3,D4)
+SuperMatrixParity(SD,R,{z_0,z_1,z_2})
+P1 = matrix{{0,0},{0,0}}
+P2 = matrix{{x_0,x_1},{x_2,x_3}}
+P3 = matrix{{x_1,x_2},{x_0,x_1}}
+P4 = matrix{{0,0},{0,0}} 
+SP = superMatrix(P1,P2,P3,P4)
+SS = SP.supermatrix
+assert(SuperMatrixParity(SP,R,{z_0,z_1,z_2})==1)
+T1 = R[n_0..n_3]
+T2 = R[e_0..e_3]
+T = superRing(T1,T2)
+M1 = matrix{{n_0,n_1},{n_2,n_3}}
+M2 = matrix{{e_0,e_1},{n_0*e_0,n_1*e_1}}
+M3 = matrix{{e_3*n_3,e_1},{e_0,e_2*n_2}}
+M4 = matrix{{n_1,n_3},{n_0,n_2+n_3}}
+SM = superMatrix(M1,M2,M3,M4)
+SuperMatrixParity(SM,T,{e_0,e_1,e_2,e_3})
+---
+E1 = matrix{{e_0,n_1},{n_2,n_3}}
+E2 = matrix{{e_0,e_1},{n_0+e_0,n_1*e_1}}
+E3 = matrix{{e_3*n_3,e_1},{e_0,e_2*n_2}}
+E4 = matrix{{n_1,n_3},{n_0,n_2+n_3}}
+G = superMatrix(E1,E2,E3,E4)
+SuperMatrixParity(G,T,{e_0,e_1,e_2,e_3})
+
+///
 --------------------
 --Supertrace           
 --------------------  
 superTrace = method ();
-superTrace SuperMatrix :=(SM)->(
+superTrace (SuperMatrix,Ring,List) :=(SM,R1,a)->(
     Minor11 := submatrix(SM.supermatrix, {0..(SM.targetM1 -1)}, {0..(SM.sourceM1 -1)});
     Minor22 := submatrix(SM.supermatrix, {SM.targetM1..(SM.targetM1 + SM.targetM3 -1)}, {SM.sourceM1..(SM.sourceM1 + SM.sourceM2 -1)});
-    trace Minor11 - trace Minor22
+    if (SuperMatrixParity(SM,R1,a)=!= -1) then
+    (par := symbol par;
+     par = SuperMatrixParity(SM,R1,a);
+     trace Minor11 -(-1)^par*trace Minor22)
+    else error "SuperMatrix is not superhomogeneous"
     )
 
 TEST ///
-M1 = matrix {{2,3},{4,5}};
-M2 = matrix {{2,3,8},{4,5,9}};
-M3 = matrix {{2,3},{4,5},{10,11}};
-M4 = matrix {{2,3,18},{5,6,19},{16,17,20}};
-G = superMatrix(M1,M2,M3,M4);
-assert(superTrace G == -21) 
+R1 = QQ[x_0..x_3]
+R2 = QQ[z_0..z_2]
+R = superRing(R1,R2)
+P1 = matrix{{x_0,x_1},{x_2,x_3}}
+P2 = matrix{{0,0},{0,0}}
+P3 = matrix{{0,0},{0,0}} 
+P4 = matrix{{x_1,x_2},{x_0,x_1}}
+SP = superMatrix(P1,P2,P3,P4)
+assert(superTrace(SP,R,{z_0,z_1})==x_0-2x_1+x_3)
+T1 = R[n_0..n_3]
+T2 = R[e_0..e_3]
+T = superRing(T1,T2)
+M1 = matrix{{n_0,n_1},{n_2,n_3}}
+M2 = matrix{{e_0,e_1},{n_0*e_0,n_1*e_1}}
+M3 = matrix{{e_3*n_3,e_1},{e_0,e_2*n_2}}
+M4 = matrix{{n_1,n_3},{n_0,n_2+n_3}}
+SM = superMatrix(M1,M2,M3,M4)
+assert(superTrace(SM,T,{e_0,e_1,e_2,e_3})==n_0-n_1-n_2)
 ///
 
 --------------------
 --Berezinian
---------------------  -----------
+-------------------- 
 Berezinian = method();
 Berezinian (SuperMatrix,Ring) := (SM,R1) ->(
     Minor11 := submatrix(SM.supermatrix, {0..(SM.targetM1 - 1)}, {0..(SM.sourceM1 - 1)});
@@ -184,6 +357,7 @@ S6 = S4 - S3*inverse(S5)*S2
 F = superMatrix(S1,S2,S3,S4)
 assert(Berezinian(F,QQ) == det(S1)*det(inverse(S6)))
 ///
+
 
 --------------------
 --isSuperHomogeneous  now work only for function 
@@ -317,7 +491,7 @@ doc ///
 Key 
   SuperMatrix
 Headline
-  Super matrix
+  Supermatrix
 Description
   Text
    Let M_1,M_2,M_3,M_4 are four matrices. 
@@ -339,6 +513,7 @@ Description
    The key targetM3 shows the number of the rows of the second part
    The key sourceM1 shows the number of columns in the first part
    The key sourceM2 shows the number of columns in the second part.
+
  Example
     M1 = matrix {{1,2},{5,6},{9,10}}
     M2 = matrix {{3,4},{7,8},{11,12}}
@@ -369,6 +544,7 @@ Description
 Caveat
 SeeAlso
 ///
+
 
 doc ///
 Key 
@@ -436,7 +612,6 @@ Description
   is invertible, if both the diagonal blocks, M_1 and M_4 are invertible.
   In this case, the inverse is given by a blocked matrix,
   T=matrix{T_1, T_2, T_3, T_4}, where
-  
   T_1=(M_1 − M_2M^{-1}_4 M_3)^{-1},
   T_2=−M^{-1}_1 M_2(M_4 − M_3M^{-1}_1 M_2)^{-1},
   T_3=−M^{-1}_4 M_3(M_1 − M_2M^{-1}_4 M_3)^{-1}, and
