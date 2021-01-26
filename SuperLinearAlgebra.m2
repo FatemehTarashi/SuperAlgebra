@@ -26,8 +26,6 @@ export {
    "Berezinian",
    "isSkewSymmetric",
    "isSuperHomogeneous",
-   "isOdd",
-   "isEven",
    "inverseSuperMatrix",
 
    --Types and keys 
@@ -189,9 +187,9 @@ assert(Berezinian(F,QQ) == det(S1)*det(inverse(S6)))
 
 --------------------
 --isSuperHomogeneous  now work only for function 
---------------------  -----------
-isSuperHomogeneous = method();
-isSuperHomogeneous (RingElement,Ring,List) := (f,R,a) -> (
+--------------------  ----------- 
+isSuperHomogeneous = method(Options => {OddOrEven => null});
+isSuperHomogeneous (RingElement,Ring,List) := ZZ => opts -> (f,R,a) -> (
     e := symbol e;
     e = exponents f;
     l := symbol l;
@@ -203,79 +201,23 @@ isSuperHomogeneous (RingElement,Ring,List) := (f,R,a) -> (
     countEvenNumber =0; 
     for i from 0 to (#e-1) do (if (d%2)==0 then countEvenNumber = countEvenNumber +1; d=0; for j from 0 to #l-1 do (if 1==(e_i)_(l_j) then (d = d + 1)));
     d=0; for j from 0 to #l-1 do (if 1==(e_(#e-1))_(l_j) then (d = d + 1)); if (d%2)==0 then countEvenNumber = countEvenNumber +1; 
-    if (countEvenNumber -1) == #e then true else if (countEvenNumber -1) == 0 then true else false 
+    if opts.OddOrEven ===null then (if (countEvenNumber -1) == #e then true else if (countEvenNumber -1) == 0 then true else false) else (if (countEvenNumber -1) == #e then 0 else if (countEvenNumber -1) == 0 then 1 else -1) 
     )  
 
 TEST ///
-R1=QQ[x_0..x_4];
-R2=QQ[e_0,e_1];
-R= superRing(R1,R2);
-a={e_0,e_1};
-f=x_1*x_2*x_3+x_1*e_0+e_1*e_0-4*x_2*e_1*e_0+4;
-g=x_1*x_2*x_3+e_0*e_1+4;
+R=QQ[x_0..x_4,y_0..y_1];
+a={y_0,y_1} ;
+g=x_1*x_2*x_3+4;
+f=x_1*x_2*x_3+x_1*y_0+y_1*y_0-4*x_2*y_1*y_0+4;
+h=y_0+y_0*x_0+y_1;
 assert(isSuperHomogeneous(f,R,a) == false)
+assert(isSuperHomogeneous(f,R,a,OddOrEven=>true) == -1)
 assert(isSuperHomogeneous(g,R,a) == true)
+assert(isSuperHomogeneous(g,R,a,OddOrEven=>true) == 0)
+assert(isSuperHomogeneous(h,R,a) == true)
+assert(isSuperHomogeneous(h,R,a,OddOrEven=>true) == 1)
 ///
 
---------------------
---isOdd
---------------------
-isOdd = method();
-isOdd (RingElement,Ring,List) := (f,R,a) -> (
-    e := symbol e;
-    e = exponents f;
-    l := symbol l;
-    l={};
-    for i from 0 to (#gens R -1) do (for j from 0 to #a -1 do (if R_(i)==a_(j) then (l= append(l,i))));
-    d := symbol d;
-    countEvenNumber := symbol countEvenNumber; 
-    d=0; 
-    countEvenNumber =0; 
-    for i from 0 to (#e-1) do (if (d%2)==0 then countEvenNumber = countEvenNumber +1; d=0; for j from 0 to #l-1 do (if 1==(e_i)_(l_j) then (d = d + 1)));
-    d=0; for j from 0 to #l-1 do (if 1==(e_(#e-1))_(l_j) then (d = d + 1)); if (d%2)==0 then countEvenNumber = countEvenNumber +1; 
-    if (countEvenNumber -1) == 0 then true  else false 
-    )  
-
-TEST ///
-R1=QQ[x_0..x_4];
-R2=QQ[e_0,e_1];
-R= superRing(R1,R2);
-a={e_0,e_1};
-g=x_1*x_2*x_3+e_0*e_1+4;
-h=x_1*e_1;
-assert(isOdd(g,R,a) == false)
-assert(isOdd(h,R,a) == true)
-///
-
---------------------
---isEven
---------------------  
-isEven = method();
-isEven (RingElement,Ring,List) := (f,R,a) -> (
-    e := symbol e;
-    e = exponents f;
-    l := symbol l;
-    l={};
-    for i from 0 to (#gens R -1) do (for j from 0 to #a -1 do (if R_(i)==a_(j) then (l= append(l,i))));
-    d := symbol d;
-    countEvenNumber := symbol countEvenNumber; 
-    d=0; 
-    countEvenNumber =0; 
-    for i from 0 to (#e-1) do (if (d%2)==0 then countEvenNumber = countEvenNumber +1; d=0; for j from 0 to #l-1 do (if 1==(e_i)_(l_j) then (d = d + 1)));
-    d=0; for j from 0 to #l-1 do (if 1==(e_(#e-1))_(l_j) then (d = d + 1)); if (d%2)==0 then countEvenNumber = countEvenNumber +1; 
-    if (countEvenNumber -1) == #e then true  else false 
-    )  
-
-TEST ///
-R1=QQ[x_0..x_4];
-R2=QQ[e_0,e_1];
-R= superRing(R1,R2);
-a={e_0,e_1};
-g=x_1*x_2*x_3+e_0*e_1+4;
-h=x_1*e_1;
-assert(isEven(g,R,a) == true)
-assert(isEven(h,R,a) == false)
-///
 
 ------------------------
 --inversesupermatrix
