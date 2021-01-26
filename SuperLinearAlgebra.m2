@@ -24,12 +24,8 @@ export {
    "superMatrix",
    "superTrace",
    "Berezinian",
-   "isSuperHomogeneous",
-   "isEven",
-   "isOdd",
-   "isSuperMatrixHomogeneous",
-   "isSuperMatrisEven",
-   "isSuperMatrixOdd",
+   "Parity",
+   "SuperMatrixParity",
    "superTrace",
    "inverseSuperMatrix",
    "isSkewSymmetric",
@@ -129,8 +125,8 @@ assert(isSkewSymmetric S ==false)
 --------------------
 --isSuperHomogeneous  now work only for function 
 --------------------  -----------
-isSuperHomogeneous = method();
-isSuperHomogeneous (RingElement,Ring,List) := (f,R,a) -> (
+Parity = method();
+Parity (RingElement,Ring,List) := (f,R,a) -> (
     e := symbol e;
     e = exponents f;
     l := symbol l;
@@ -142,82 +138,39 @@ isSuperHomogeneous (RingElement,Ring,List) := (f,R,a) -> (
     countEvenNumber =0; 
     for i from 0 to (#e-1) do (if (d%2)==0 then countEvenNumber = countEvenNumber +1; d=0; for j from 0 to #l-1 do (if 1==(e_i)_(l_j) then (d = d + 1)));
     d=0; for j from 0 to #l-1 do (if 1==(e_(#e-1))_(l_j) then (d = d + 1)); if (d%2)==0 then countEvenNumber = countEvenNumber +1; 
-    if (countEvenNumber -1) == #e then true else if (countEvenNumber -1) == 0 then true else false 
+    if (countEvenNumber -1) == #e then 0 else if (countEvenNumber -1) == 0 then 1 else -1
     ) 
-TEST ///
-R1=QQ[x_0..x_4];
-R2=QQ[e_0,e_1];
-R= superRing(R1,R2);
-a={e_0,e_1};
-f=x_1*x_2*x_3+x_1*e_0+e_1*e_0-4*x_2*e_1*e_0+4;
-g=x_1*x_2*x_3+e_0*e_1+4;
-assert(isSuperHomogeneous(f,R,a) == false)
-assert(isSuperHomogeneous(g,R,a) == true)
-///
----------------------------------------
---isOdd
---------------------------------------
-isOdd = method();
-isOdd (RingElement,Ring,List) := (f,R,a) -> (
-    e := symbol e;
-    e = exponents f;
-    l := symbol l;
-    l={};
-    for i from 0 to (#gens R -1) do (for j from 0 to #a -1 do (if R_(i)==a_(j) then (l= append(l,i))));
-    d := symbol d;
-    countEvenNumber := symbol countEvenNumber; 
-    d=0; 
-    countEvenNumber =0; 
-    for i from 0 to (#e-1) do (if (d%2)==0 then countEvenNumber = countEvenNumber +1; d=0; for j from 0 to #l-1 do (if 1==(e_i)_(l_j) then (d = d + 1)));
-    d=0; for j from 0 to #l-1 do (if 1==(e_(#e-1))_(l_j) then (d = d + 1)); if (d%2)==0 then countEvenNumber = countEvenNumber +1; 
-    if (countEvenNumber -1) == 0 then true  else false 
-    )  
+
+Parity (Number,Ring,List) := (f,R,a) -> (
+    0
+    ) 
 
 TEST ///
-R1=QQ[x_0..x_4];
-R2=QQ[e_0,e_1];
-R= superRing(R1,R2);
-a={e_0,e_1};
-g=x_1*x_2*x_3+e_0*e_1+4;
-h=x_1*e_1;
-assert(isOdd(g,R,a) == false)
-assert(isOdd(h,R,a) == true)
+R1 = QQ[x_0..x_3]
+R2 = QQ[z_0,z_1]
+R = superRing(R1,R2)
+a={z_0,z_1} ;
+g=x_1*x_2*x_3+4;
+f=x_1*x_2*x_3+x_1*z_0+z_1*z_0-4*x_2*z_1*z_0+4;
+h=z_0+z_0*x_0+z_1;
+assert(Parity(f,R,a) == -1)
+assert(Parity(g,R,a) == 0)
+assert(Parity(h,R,a) == 1)
+assert(Parity(1+2.5*ii,R,a) == 0)
+P1 = matrix{{0,0},{0,0}}
+P2 = matrix{{x_0,x_1},{x_2,x_3}}
+P3 = matrix{{x_1,x_2},{x_0,x_1}}
+P4 = matrix{{0,0},{0,0}} 
+SP = superMatrix(P1,P2,P3,P4)
+SS = SP.supermatrix
+t = SS_(0,0)
+Parity(0,R,{z_0})
 ///
-
---------------------
---isEven
---------------------  
-isEven = method();
-isEven (RingElement,Ring,List) := (f,R,a) -> (
-    e := symbol e;
-    e = exponents f;
-    l := symbol l;
-    l={};
-    for i from 0 to (#gens R -1) do (for j from 0 to #a -1 do (if R_(i)==a_(j) then (l= append(l,i))));
-    d := symbol d;
-    countEvenNumber := symbol countEvenNumber; 
-    d=0; 
-    countEvenNumber =0; 
-    for i from 0 to (#e-1) do (if (d%2)==0 then countEvenNumber = countEvenNumber +1; d=0; for j from 0 to #l-1 do (if 1==(e_i)_(l_j) then (d = d + 1)));
-    d=0; for j from 0 to #l-1 do (if 1==(e_(#e-1))_(l_j) then (d = d + 1)); if (d%2)==0 then countEvenNumber = countEvenNumber +1; 
-    if (countEvenNumber -1) == #e then true  else false 
-    )  
-
-TEST ///
-R1=QQ[x_0..x_4];
-R2=QQ[e_0,e_1];
-R= superRing(R1,R2);
-a={e_0,e_1};
-g=x_1*x_2*x_3+e_0*e_1+4;
-h=x_1*e_1;
-assert(isEven(g,R,a) == true)
-assert(isEven(h,R,a) == false)
-///
-------------------------------------
---isSuperMatrixHomogeneous
+----------------------------------
+--SuperMatrixParity
 --------------------------------
-isSuperMatrixHomogeneous = method();
-isSuperMatrixHomogeneous(SuperMatrix,Ring,List) := (SM,R1,a) ->(
+SuperMatrixParity = method();
+SuperMatrixParity(SuperMatrix,Ring,List) := (SM,R1,a) ->(
     m1 := symbol m1;
     m2 := symbol m2;
     m3 := symbol m3;
@@ -258,44 +211,42 @@ isSuperMatrixHomogeneous(SuperMatrix,Ring,List) := (SM,R1,a) ->(
      count44=0;
    for i from 0 to (r1-1) do for j from 0 to (c1-1)
 	do(fij = Minor11_(i,j);
-	    if (isSuperHomogeneous(fij,R1,a)==true) then
-	       (if (isEven(fij,R1,a)==false) then 
+	    if fij==0 then count1 = count1 else
+	    if (Parity(fij,R1,a)==-1) then (count11 = count11 +1) else
+	       if (Parity(fij,R1,a)==1) then 
 	           count1 = count1+1
-	           else count1 = count1)
-	       else count11 = count11+1);
-	    if count11 =!= 0 then (return false) else if count1 == 0 then m1= 0 else m1=1;
+	           else if (Parity(fij,R1,a)==0) then count1 = count1);
+	      if count11=!=0 then (return -1)else if count1 == 0 then m1= 0 else m1=1;
 	for i from 0 to (r1-1) do for j from 0 to (c2-1)
 	do(fij = Minor12_(i,j);
-	    if isSuperHomogeneous(fij,R1,a)==true then
-	    (if (isEven(fij,R1,a)==false)
-		then count2 = count2+1
-		else count2 = count2)
-	   else count22=count22+1);
-	   if count22=!=0 then (return false) else if count2 ==0 then m2=0 else m2=1;
+	    if fij==0 then count2 = count2 else
+	   if (Parity(fij,R1,a)==-1) then (count22 = count22 + 1) else
+	    if (Parity(fij,R1,a)==1)then count2 = count2+1
+		else if (Parity(fij,R1,a)==0) then count2 = count2);
+	   if count22=!=0 then (return -1) else if count2==0 then m2=0 else m2=1;
        for i from 0 to (r2-1) do for j from 0 to (c1-1)
        do(fij = Minor21_(i,j);
-	   if isSuperHomogeneous(fij,R1,a)==true then
-	    (if(isEven(fij,R1,a)==false)
-		then count3 = count3+1
-		else count3 = count3)
-	   else count33=count33+1);
-	   if count33=!=0 then (return false)  else if count3==0 then m3=0 else m3=1;
+	   if fij==0 then count3 = count3 else
+	   if (Parity(fij,R1,a)==-1) then (cout33=count33+1) else
+	     if (Parity(fij,R1,a)==1)then count3 = count3+1
+		else if (Parity(fij,R1,a)==0) then count3 = count3);
+	   if count33=!=0 then (return -1) else if count3==0 then m3=0 else m3=1;
        for i from 0 to (r2-1) do for j from 0 to (c2-1)
        do(fij = Minor22_(i,j);
-	   if isSuperHomogeneous(fij,R1,a)==true then
-	    (if(isEven(fij,R1,a)==false)
-		then count4 = count4+1
-		else count4 = count4)
-	   else cout44=count44+1);
-	  if count44=!=0 then (return false) else if count4==0 then m4=0 else m4=1;
+	   if fij==0 then count4 = count4 else
+	   if (Parity(fij,R1,a)==-1) then (cout44=count44+1) else
+	   if (Parity(fij,R1,a)==1)then count4 = count4+1
+		else if (Parity(fij,R1,a)==0) then count4 = count4);
+	  if count44=!=0 then (return -1) else if count4==0 then m4=0 else m4=1;
       R2 = coefficientRing R1;
       if (isSkewSymmetric(R2)==true) then(
-       if (m1==0 and m4==0 and m2==1 and m3==1)then true
-       else if (m1==1 and m4==1 and m2==0 and m3==0) then  true else false)
-       else if (m1==0 and m4==0 and m2==1 and m3==1) then 
-        true else if (m1==1 and m4==1 and m2==0 and m3==0) then
-        true else false
-	)
+       if (m1==0 and m4==0 and m2==1 and m3==1)then ( return 0)
+       else if (m1==1 and m4==1 and m2==0 and m3==0) then (return 1) else (return -1))
+       else(
+        if (m1==0 and m4==0 and Minor12==0 and Minor21==0) then  (return 0)
+       else if (Minor11==0 and Minor22==0 and m2==0 and m3==0) then (return 1)
+       else (return -1))
+   )
     else (error "Ring should be a superRing")
 )
 
@@ -303,6 +254,19 @@ TEST///
 R1 = QQ[x_0..x_3]
 R2 = QQ[z_0..z_2]
 R = superRing(R1,R2)
+D1 = matrix{{x_0,x_1},{x_2,x_3}}
+D2 = matrix{{z_0,z_1},{x_0*z_0,x_1*z_1}}
+D3 = matrix{{z_2*x_3,z_1},{z_0,z_2*x_2}}
+D4 = matrix{{x_1,x_3},{x_0,x_2+x_3}} 
+SD = superMatrix(D1,D2,D3,D4)
+SuperMatrixParity(SD,R,{z_0,z_1,z_2})
+P1 = matrix{{0,0},{0,0}}
+P2 = matrix{{x_0,x_1},{x_2,x_3}}
+P3 = matrix{{x_1,x_2},{x_0,x_1}}
+P4 = matrix{{0,0},{0,0}} 
+SP = superMatrix(P1,P2,P3,P4)
+SS = SP.supermatrix
+assert(SuperMatrixParity(SP,R,{z_0,z_1,z_2})==1)
 T1 = R[n_0..n_3]
 T2 = R[e_0..e_3]
 T = superRing(T1,T2)
@@ -311,228 +275,49 @@ M2 = matrix{{e_0,e_1},{n_0*e_0,n_1*e_1}}
 M3 = matrix{{e_3*n_3,e_1},{e_0,e_2*n_2}}
 M4 = matrix{{n_1,n_3},{n_0,n_2+n_3}}
 SM = superMatrix(M1,M2,M3,M4)
-assert(isSuperMatrixHomogeneous(SM,T,{e_0,e_1,e_2,e_3})==true)
+SuperMatrixParity(SM,T,{e_0,e_1,e_2,e_3})
 ---
 E1 = matrix{{e_0,n_1},{n_2,n_3}}
 E2 = matrix{{e_0,e_1},{n_0+e_0,n_1*e_1}}
 E3 = matrix{{e_3*n_3,e_1},{e_0,e_2*n_2}}
 E4 = matrix{{n_1,n_3},{n_0,n_2+n_3}}
 G = superMatrix(E1,E2,E3,E4)
-assert(isSuperMatrixHomogeneous(G,T,{e_0,e_1,e_2,e_3})==false)
+SuperMatrixParity(G,T,{e_0,e_1,e_2,e_3})
+
 ///
-
------------------------------------------
---isSuperMatrixEven
----------------------------------------
-isSuperMatrixEven = method();
-isSuperMatrixEven (SuperMatrix,Ring,List) :=(SM,R1,a)->(
-if (isSuperMatrixHomogeneous(SM,R1,a)==true) then
-   ( m1 := symbol m1;
-    m2 := symbol m2;
-    m3 := symbol m3;
-    m4 := symbol m4;
-    m1 = 0;
-    m2 = 0;
-    m3 = 0;
-    m4 = 0;
-    r1 := symbol r1;
-    r2 := symbol r2;
-    c1 := symbol c1;
-    c2 := symbol c2;
-    r1=SM.targetM1;
-    r2=SM.targetM3;
-    c1=SM.sourceM1;
-    c2=SM.sourceM2;
-    Minor11 := submatrix(SM.supermatrix, {0..(r1 - 1)}, {0..(c1 - 1)});
-    Minor22 := submatrix(SM.supermatrix, {r1..(r1 + r2 - 1)}, {c1..(c1 + c2 - 1)});
-    Minor21 := submatrix(SM.supermatrix, {r1..(r1 + r2 - 1)}, {0..(c1 - 1)});
-    Minor12 := submatrix(SM.supermatrix, {0..(r1 - 1)}, {c1..(c1 + c2 - 1)});
-    if isSkewSymmetric(R1)==true then
-    (fij := symbol fij;
-     count1:= symbol count1;
-     count1=0;
-     count2:=symbol count2;
-     count2=0;
-     count3:=symbol count3;
-     count3=0;
-     count4:=symbol count4;
-     count4=0;
-   for i from 0 to (r1-1) do for j from 0 to (c1-1)
-	do(fij = Minor11_(i,j);
-	   if (isEven(fij,R1,a)==false) then 
-	           count1 = count1+1
-	           else count1 = count1);
-	    if count1 == 0 then m1= 0 else m1=1;
-	for i from 0 to (r1-1) do for j from 0 to (c2-1)
-	do(fij = Minor12_(i,j);
-	    if (isEven(fij,R1,a)==false)
-		then count2 = count2+1
-		else count2 = count2);
-	   if count2 ==0 then m2=0 else m2=1;
-       for i from 0 to (r2-1) do for j from 0 to (c1-1)
-       do(fij = Minor21_(i,j);
-	   if(isEven(fij,R1,a)==false)
-		then count3 = count3+1
-		else count3 = count3);
-	   if count3==0 then m3=0 else m3=1;
-       for i from 0 to (r2-1) do for j from 0 to (c2-1)
-       do(fij = Minor22_(i,j);
-	   if(isEven(fij,R1,a)==false)
-		then count4 = count4+1
-		else count4 = count4);
-	  if count4==0 then m4=0 else m4=1;
-      R2 = coefficientRing R1;
-      if (isSkewSymmetric(R2)==true) then(
-       if (m1==0 and m4==0 and m2==1 and m3==1)then true
-       else if (m1==1 and m4==1 and m2==0 and m3==0) then  (print "superMatrix is odd", return false) else error "superMatrix is not homogeneous")
-       else if (m1==0 and m4==0 and m2==1 and m3==1) then 
-        true else if (m1==1 and m4==1 and m2==0 and m3==0) then
-        (print "superMatrix is odd",return false) else error "superMatrix is not homogeneous")
-    else (error "Ring should be a superRing")
- )
-else (print "SuperMatrix is not superHomogeneous",return false)
-)
-
-TEST\\\
-R1 = QQ[x_0..x_3]
-R2 = QQ[z_0..z_2]
-R = superRing(R1,R2)
-T1 = R[n_0..n_3]
-T2 = R[e_0..e_3]
-T = superRing(T1,T2)
-M1 = matrix{{n_0,n_1},{n_2,n_3}}
-M2 = matrix{{e_0,e_1},{n_0*e_0,n_1*e_1}}
-M3 = matrix{{e_3*n_3,e_1},{e_0,e_2*n_2}}
-M4 = matrix{{n_1,n_3},{n_0,n_2+n_3}}
-SM = superMatrix(M1,M2,M3,M4)
-SM2 = superMatrix(M2,M1,M4,M3)
-assert(isSuperMatrixEven(SM,T,{e_0,e_1,e_2,e_3})==true)
-assert(isSuperMatrixEven(SM2,T,{e_0,e_1,e_2,e_3})==false)
----
-E1 = matrix{{e_0,n_1},{n_2,n_3}}
-E2 = matrix{{e_0,e_1},{n_0+e_0,n_1*e_1}}
-E3 = matrix{{e_3*n_3,e_1},{e_0,e_2*n_2}}
-E4 = matrix{{n_1,n_3},{n_0,n_2+n_3}}
-G = superMatrix(E1,E2,E3,E4)
-assert(isSuperMatrixEven(G,T,{e_0,e_1,e_2,e_3})==false)
-\\\
-
---------------------------------------
----isSuperMatrixOdd
---------------------------------------
-isSuperMatrixOdd = method();
-isSuperMatrixOdd (SuperMatrix,Ring,List) :=(SM,R1,a)->(
-if (isSuperMatrixHomogeneous(SM,R1,a)==true) then
-   (m1 := symbol m1;
-    m2 := symbol m2;
-    m3 := symbol m3;
-    m4 := symbol m4;
-    m1 = 0;
-    m2 = 0;
-    m3 = 0;
-    m4 = 0;
-    r1 := symbol r1;
-    r2 := symbol r2;
-    c1 := symbol c1;
-    c2 := symbol c2;
-    r1=SM.targetM1;
-    r2=SM.targetM3;
-    c1=SM.sourceM1;
-    c2=SM.sourceM2;
-    Minor11 := submatrix(SM.supermatrix, {0..(r1 - 1)}, {0..(c1 - 1)});
-    Minor22 := submatrix(SM.supermatrix, {r1..(r1 + r2 - 1)}, {c1..(c1 + c2 - 1)});
-    Minor21 := submatrix(SM.supermatrix, {r1..(r1 + r2 - 1)}, {0..(c1 - 1)});
-    Minor12 := submatrix(SM.supermatrix, {0..(r1 - 1)}, {c1..(c1 + c2 - 1)});
-    if isSkewSymmetric(R1)==true then
-    (fij := symbol fij;
-     count1:= symbol count1;
-     count1=0;
-     count2:=symbol count2;
-     count2=0;
-     count3:=symbol count3;
-     count3=0;
-     count4:=symbol count4;
-     count4=0;
-   for i from 0 to (r1-1) do for j from 0 to (c1-1)
-	do(fij = Minor11_(i,j);
-	   if (isEven(fij,R1,a)==false) then 
-	           count1 = count1+1
-	           else count1 = count1);
-	    if count1 == 0 then m1= 0 else m1=1;
-	for i from 0 to (r1-1) do for j from 0 to (c2-1)
-	do(fij = Minor12_(i,j);
-	   if (isEven(fij,R1,a)==false)
-		then count2 = count2+1
-		else count2 = count2);
-	   if count2 ==0 then m2=0 else m2=1;
-       for i from 0 to (r2-1) do for j from 0 to (c1-1)
-       do(fij = Minor21_(i,j);
-	  if(isEven(fij,R1,a)==false)
-		then count3 = count3+1
-		else count3 = count3);
-	  if count3==0 then m3=0 else m3=1;
-       for i from 0 to (r2-1) do for j from 0 to (c2-1)
-       do(fij = Minor22_(i,j);
-	  if(isEven(fij,R1,a)==false)
-		then count4 = count4+1
-		else count4 = count4);
-	  if count4==0 then m4=0 else m4=1;
-      R2 = coefficientRing R1;
-      if (isSkewSymmetric(R2)==true) then(
-       if (m1==0 and m4==0 and m2==1 and m3==1)then (print "superMatrix is even",return false)
-       else if (m1==1 and m4==1 and m2==0 and m3==0) then true else error "superMatrix is not homogeneous")
-       else if (m1==0 and m4==0 and m2==1 and m3==1) then 
-        (print "superMatrix is even",return false) else if (m1==1 and m4==1 and m2==0 and m3==0) then
-        true else error "superMatrix is not homogeneous")
-    else (error "Ring should be a superRing")
- )
-else (print "SuperMatrix is not superHomogeneous",return false)
-)
-
-TEST\\\
-R1 = QQ[x_0..x_3]
-R2 = QQ[z_0..z_2]
-R = superRing(R1,R2)
-T1 = R[n_0..n_3]
-T2 = R[e_0..e_3]
-T = superRing(T1,T2)
-M1 = matrix{{n_0,n_1},{n_2,n_3}}
-M2 = matrix{{e_0,e_1},{n_0*e_0,n_1*e_1}}
-M3 = matrix{{e_3*n_3,e_1},{e_0,e_2*n_2}}
-M4 = matrix{{n_1,n_3},{n_0,n_2+n_3}}
-SM = superMatrix(M1,M2,M3,M4)
-SM2 = superMatrix(M2,M1,M4,M3)
-assert(isSuperMatrixOdd(SM,T,{e_0,e_1,e_2,e_3})==false)
-assert(isSuperMatrixOdd(SM2,T,{e_0,e_1,e_2,e_3})==true)
----
-E1 = matrix{{e_0,n_1},{n_2,n_3}}
-E2 = matrix{{e_0,e_1},{n_0+e_0,n_1*e_1}}
-E3 = matrix{{e_3*n_3,e_1},{e_0,e_2*n_2}}
-E4 = matrix{{n_1,n_3},{n_0,n_2+n_3}}
-G = superMatrix(E1,E2,E3,E4)
-assert(isSuperMatrixEven(G,T,{e_0,e_1,e_2,e_3})==false)
-\\\
 --------------------
 --Supertrace           
 --------------------  
 superTrace = method ();
-superTrace SuperMatrix :=(SM)->(
+superTrace (SuperMatrix,Ring,List) :=(SM,R1,a)->(
     Minor11 := submatrix(SM.supermatrix, {0..(SM.targetM1 -1)}, {0..(SM.sourceM1 -1)});
     Minor22 := submatrix(SM.supermatrix, {SM.targetM1..(SM.targetM1 + SM.targetM3 -1)}, {SM.sourceM1..(SM.sourceM1 + SM.sourceM2 -1)});
-    if (isSuperMatrixEven(SM)==true) then
-    trace Minor11 - trace Minor22
-    else if (isSuperMatrixOdd(SM)==true) then
-    trace Minor11 + trace Minor22
-	else error "SuperMatrix is not superhomogeneous"
+    if (SuperMatrixParity(SM,R1,a)=!= -1) then
+    (par := symbol par;
+     par = SuperMatrixParity(SM,R1,a);
+     trace Minor11 -(-1)^par*trace Minor22)
+    else error "SuperMatrix is not superhomogeneous"
     )
 
 TEST ///
-M1 = matrix {{2,3},{4,5}};
-M2 = matrix {{2,3,8},{4,5,9}};
-M3 = matrix {{2,3},{4,5},{10,11}};
-M4 = matrix {{2,3,18},{5,6,19},{16,17,20}};
-G = superMatrix(M1,M2,M3,M4);
-assert(superTrace G == -21) 
+R1 = QQ[x_0..x_3]
+R2 = QQ[z_0..z_2]
+R = superRing(R1,R2)
+P1 = matrix{{x_0,x_1},{x_2,x_3}}
+P2 = matrix{{0,0},{0,0}}
+P3 = matrix{{0,0},{0,0}} 
+P4 = matrix{{x_1,x_2},{x_0,x_1}}
+SP = superMatrix(P1,P2,P3,P4)
+assert(superTrace(SP,R,{z_0,z_1})==x_0-2x_1+x_3)
+T1 = R[n_0..n_3]
+T2 = R[e_0..e_3]
+T = superRing(T1,T2)
+M1 = matrix{{n_0,n_1},{n_2,n_3}}
+M2 = matrix{{e_0,e_1},{n_0*e_0,n_1*e_1}}
+M3 = matrix{{e_3*n_3,e_1},{e_0,e_2*n_2}}
+M4 = matrix{{n_1,n_3},{n_0,n_2+n_3}}
+SM = superMatrix(M1,M2,M3,M4)
+assert(superTrace(SM,T,{e_0,e_1,e_2,e_3})==n_0-n_1-n_2)
 ///
 
 --------------------
