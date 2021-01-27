@@ -25,12 +25,13 @@ export {
    "superTrace",
    "Berezinian",
    "isSkewSymmetric",
-   "Parity",
+   "Parity", 
    "SuperMatrixParity",
+   "inverseSuperMatrix", 
    
    --Types and keys 
    "SuperMatrix",
-   "supermatrix", "targetM1", "targetM3", "sourceM1", "sourceM2",
+   "supermatrix", "targetM1", "targetM3", "sourceM1", "sourceM2"
  }
 
 --------------------------------------------------------------
@@ -52,14 +53,16 @@ superRing (PolynomialRing,PolynomialRing):= (R1,R2) -> (
          R111**R22
          )    
 
+TEST ///
+
+///      
+ 
 ------------------------------------------------------
 --SuperMatrix
 --This a is new mulitivariate Hash table with 5 keys.
 --supermatrix, targetM1, targetM3, sourceM1, sourceM2
 ------------------------------------------------
 SuperMatrix = new Type of MutableHashTable;
---a SuperMatrix always has the following keys:
--- supermatrix, targetM1, targetM3, sourceM1, sourceM2
 
 superMatrix = method();
 superMatrix (Matrix,Matrix,Matrix,Matrix):= (M1,M2,M3,M4) ->(
@@ -111,18 +114,17 @@ isSkewSymmetric Ring := (R1)->(
            )
 
 TEST ///
-R1 = QQ[x_0..x_3]
-R2 = QQ[z_0..z_2]
-R = superRing(r1,r2)
+R1 = QQ[x_0..x_3];
+R2 = QQ[z_0..z_2];
+R = superRing(R1,R2);
 assert(isSkewSymmetric R == true)
-S=QQ[x_0..x_5]
-assert(isSkewSymmetric S ==false)
+S=QQ[x_0..x_5];
+assert(isSkewSymmetric S == false)
 ///
 
-
 --------------------
---isSuperHomogeneous  now work only for function 
---------------------  -----------
+--Parity  
+-------------------- 
 Parity = method();
 Parity (RingElement,Ring,List) := (f,R,a) -> (
     e := symbol e;
@@ -144,9 +146,9 @@ Parity (Number,Ring,List) := (f,R,a) -> (
     ) 
 
 TEST ///
-R1 = QQ[x_0..x_3]
-R2 = QQ[z_0,z_1]
-R = superRing(R1,R2)
+R1 = QQ[x_0..x_3];
+R2 = QQ[z_0,z_1];
+R = superRing(R1,R2);
 a={z_0,z_1} ;
 g=x_1*x_2*x_3+4;
 f=x_1*x_2*x_3+x_1*z_0+z_1*z_0-4*x_2*z_1*z_0+4;
@@ -155,14 +157,15 @@ assert(Parity(f,R,a) == -1)
 assert(Parity(g,R,a) == 0)
 assert(Parity(h,R,a) == 1)
 assert(Parity(1+2.5*ii,R,a) == 0)
-P1 = matrix{{0,0},{0,0}}
-P2 = matrix{{x_0,x_1},{x_2,x_3}}
-P3 = matrix{{x_1,x_2},{x_0,x_1}}
-P4 = matrix{{0,0},{0,0}} 
-SP = superMatrix(P1,P2,P3,P4)
-SS = SP.supermatrix
-t = SS_(0,0)
-Parity(0,R,{z_0})
+
+P1 = matrix{{0,0},{0,0}};
+P2 = matrix{{x_0,x_1},{x_2,x_3}};
+P3 = matrix{{x_1,x_2},{x_0,x_1}};
+P4 = matrix{{0,0},{0,0}} ;
+SP = superMatrix(P1,P2,P3,P4);
+SS = SP.supermatrix;
+t = SS_(0,0);
+assert(Parity(0,R,{z_0}) == 0)
 ///
 ----------------------------------
 --SuperMatrixParity
@@ -191,6 +194,9 @@ SuperMatrixParity(SuperMatrix,Ring,List) := (SM,R1,a) ->(
     Minor12 := submatrix(SM.supermatrix, {0..(r1 - 1)}, {c1..(c1 + c2 - 1)});
     if isSkewSymmetric(R1)==true then
     (fij := symbol fij;
+     cout33:= symbol cout33;
+     cout44:= symbol cout44;
+     count12:= symbol count12;
      count1:= symbol count1;
      count1=0;
      count11:=symbol count12;
@@ -236,6 +242,7 @@ SuperMatrixParity(SuperMatrix,Ring,List) := (SM,R1,a) ->(
 	   if (Parity(fij,R1,a)==1)then count4 = count4+1
 		else if (Parity(fij,R1,a)==0) then count4 = count4);
 	  if count44=!=0 then (return -1) else if count4==0 then m4=0 else m4=1;
+      R2 := symbol R2;
       R2 = coefficientRing R1;
       if (isSkewSymmetric(R2)==true) then(
        if (m1==0 and m4==0 and m2==1 and m3==1)then ( return 0)
@@ -249,39 +256,40 @@ SuperMatrixParity(SuperMatrix,Ring,List) := (SM,R1,a) ->(
 )
 
 TEST///
-R1 = QQ[x_0..x_3]
-R2 = QQ[z_0..z_2]
-R = superRing(R1,R2)
-D1 = matrix{{x_0,x_1},{x_2,x_3}}
-D2 = matrix{{z_0,z_1},{x_0*z_0,x_1*z_1}}
-D3 = matrix{{z_2*x_3,z_1},{z_0,z_2*x_2}}
-D4 = matrix{{x_1,x_3},{x_0,x_2+x_3}} 
-SD = superMatrix(D1,D2,D3,D4)
-SuperMatrixParity(SD,R,{z_0,z_1,z_2})
-P1 = matrix{{0,0},{0,0}}
-P2 = matrix{{x_0,x_1},{x_2,x_3}}
-P3 = matrix{{x_1,x_2},{x_0,x_1}}
-P4 = matrix{{0,0},{0,0}} 
-SP = superMatrix(P1,P2,P3,P4)
-SS = SP.supermatrix
-assert(SuperMatrixParity(SP,R,{z_0,z_1,z_2})==1)
-T1 = R[n_0..n_3]
-T2 = R[e_0..e_3]
-T = superRing(T1,T2)
-M1 = matrix{{n_0,n_1},{n_2,n_3}}
-M2 = matrix{{e_0,e_1},{n_0*e_0,n_1*e_1}}
-M3 = matrix{{e_3*n_3,e_1},{e_0,e_2*n_2}}
-M4 = matrix{{n_1,n_3},{n_0,n_2+n_3}}
-SM = superMatrix(M1,M2,M3,M4)
-SuperMatrixParity(SM,T,{e_0,e_1,e_2,e_3})
----
-E1 = matrix{{e_0,n_1},{n_2,n_3}}
-E2 = matrix{{e_0,e_1},{n_0+e_0,n_1*e_1}}
-E3 = matrix{{e_3*n_3,e_1},{e_0,e_2*n_2}}
-E4 = matrix{{n_1,n_3},{n_0,n_2+n_3}}
-G = superMatrix(E1,E2,E3,E4)
-SuperMatrixParity(G,T,{e_0,e_1,e_2,e_3})
+R1 = QQ[x_0..x_3];
+R2 = QQ[z_0..z_2];
+R = superRing(R1,R2);
+D1 = matrix{{x_0,x_1},{x_2,x_3}};
+D2 = matrix{{z_0,z_1},{x_0*z_0,x_1*z_1}};
+D3 = matrix{{z_2*x_3,z_1},{z_0,z_2*x_2}};
+D4 = matrix{{x_1,x_3},{x_0,x_2+x_3}};
+SD = superMatrix(D1,D2,D3,D4);
+assert(SuperMatrixParity(SD,R,{z_0,z_1,z_2}) == -1)
 
+P1 = matrix{{0,0},{0,0}};
+P2 = matrix{{x_0,x_1},{x_2,x_3}};
+P3 = matrix{{x_1,x_2},{x_0,x_1}};
+P4 = matrix{{0,0},{0,0}};
+SP = superMatrix(P1,P2,P3,P4);
+SS = SP.supermatrix;
+assert(SuperMatrixParity(SP,R,{z_0,z_1,z_2}) == 1)
+
+T1 = R[n_0..n_3];
+T2 = R[e_0..e_3];
+T = superRing(T1,T2);
+M1 = matrix{{n_0,n_1},{n_2,n_3}};
+M2 = matrix{{e_0,e_1},{n_0*e_0,n_1*e_1}};
+M3 = matrix{{e_3*n_3,e_1},{e_0,e_2*n_2}};
+M4 = matrix{{n_1,n_3},{n_0,n_2+n_3}};
+SM = superMatrix(M1,M2,M3,M4);
+assert(SuperMatrixParity(SM,T,{e_0,e_1,e_2,e_3}) == 0)
+---
+E1 = matrix{{e_0,n_1},{n_2,n_3}};
+E2 = matrix{{e_0,e_1},{n_0+e_0,n_1*e_1}};
+E3 = matrix{{e_3*n_3,e_1},{e_0,e_2*n_2}};
+E4 = matrix{{n_1,n_3},{n_0,n_2+n_3}};
+G = superMatrix(E1,E2,E3,E4);
+assert(SuperMatrixParity(G,T,{e_0,e_1,e_2,e_3}) == -1)
 ///
 --------------------
 --Supertrace           
@@ -298,24 +306,25 @@ superTrace (SuperMatrix,Ring,List) :=(SM,R1,a)->(
     )
 
 TEST ///
-R1 = QQ[x_0..x_3]
-R2 = QQ[z_0..z_2]
-R = superRing(R1,R2)
-P1 = matrix{{x_0,x_1},{x_2,x_3}}
-P2 = matrix{{0,0},{0,0}}
-P3 = matrix{{0,0},{0,0}} 
-P4 = matrix{{x_1,x_2},{x_0,x_1}}
-SP = superMatrix(P1,P2,P3,P4)
-assert(superTrace(SP,R,{z_0,z_1})==x_0-2x_1+x_3)
-T1 = R[n_0..n_3]
-T2 = R[e_0..e_3]
-T = superRing(T1,T2)
-M1 = matrix{{n_0,n_1},{n_2,n_3}}
-M2 = matrix{{e_0,e_1},{n_0*e_0,n_1*e_1}}
-M3 = matrix{{e_3*n_3,e_1},{e_0,e_2*n_2}}
-M4 = matrix{{n_1,n_3},{n_0,n_2+n_3}}
-SM = superMatrix(M1,M2,M3,M4)
-assert(superTrace(SM,T,{e_0,e_1,e_2,e_3})==n_0-n_1-n_2)
+R1 = QQ[x_0..x_3];
+R2 = QQ[z_0..z_2];
+R = superRing(R1,R2);
+P1 = matrix{{x_0,x_1},{x_2,x_3}};
+P2 = matrix{{0,0},{0,0}};
+P3 = matrix{{0,0},{0,0}};
+P4 = matrix{{x_1,x_2},{x_0,x_1}};
+SP = superMatrix(P1,P2,P3,P4);
+assert(superTrace(SP,R,{z_0,z_1})==x_0-2*x_1+x_3)
+-*
+T1 = R[n_0..n_3];
+T2 = R[e_0..e_3];
+T = superRing(T1,T2);
+M1 = matrix{{n_0,n_1},{n_2,n_3}};
+M2 = matrix{{e_0,e_1},{n_0*e_0,n_1*e_1}};
+M3 = matrix{{e_3*n_3,e_1},{e_0,e_2*n_2}};
+M4 = matrix{{n_1,n_3},{n_0,n_2+n_3}};
+SM = superMatrix(M1,M2,M3,M4);
+assert(superTrace(SM,T,{e_0,e_1,e_2,e_3})==n_0-n_1-n_2)*-
 ///
 
 --------------------
@@ -340,61 +349,23 @@ Berezinian (SuperMatrix,Ring) := (SM,R1) ->(
  
 --superDeterminant = Berezinian ---###
 TEST///
-M1 = matrix{{5,7},{1,2}}
-M2 = matrix{{1,2,3},{4,5,6}}
-M3 = matrix{{3,4},{5,6},{7,8}}
-M4 = matrix{{2,3,11},{4,5,6},{7,8,9}}
-M5 = sub(M4,QQ)
-G = superMatrix(M1,M2,M3,M4)
+M1 = matrix{{5,7},{1,2}};
+M2 = matrix{{1,2,3},{4,5,6}};
+M3 = matrix{{3,4},{5,6},{7,8}};
+M4 = matrix{{2,3,11},{4,5,6},{7,8,9}};
+M5 = sub(M4,QQ);
+G = superMatrix(M1,M2,M3,M4);
 assert(Berezinian(G,QQ)== det(inverse(M5))*det(M1-M2*inverse(M5)*M3))
---Example2
-S1 = matrix{{1,2},{3,4}}
-S2 = matrix{{5,6},{7,8}}
-S3 = matrix{{9,10},{11,12}}
-S4 = matrix{{0,0},{0,0}}
-S5 = sub(S1,QQ)
-S6 = S4 - S3*inverse(S5)*S2
-F = superMatrix(S1,S2,S3,S4)
+
+S1 = matrix{{1,2},{3,4}};
+S2 = matrix{{5,6},{7,8}};
+S3 = matrix{{9,10},{11,12}};
+S4 = matrix{{0,0},{0,0}};
+S5 = sub(S1,QQ);
+S6 = S4 - S3*inverse(S5)*S2;
+F = superMatrix(S1,S2,S3,S4);
 assert(Berezinian(F,QQ) == det(S1)*det(inverse(S6)))
 ///
-
-
---------------------
---isSuperHomogeneous  now work only for function 
---------------------  ----------- 
-Parity = method();
-Parity (RingElement,Ring,List) := (f,R,a) -> (
-    if f == 0 then return 0;
-    e := symbol e;
-    e = exponents f;
-    l := symbol l;
-    l={};
-    for i from 0 to (#gens R -1) do (for j from 0 to #a -1 do (if R_(i)==a_(j) then (l= append(l,i))));
-    d := symbol d;
-    countEvenNumber := symbol countEvenNumber; 
-    d=0; 
-    countEvenNumber =0; 
-    for i from 0 to (#e-1) do (if (d%2)==0 then countEvenNumber = countEvenNumber +1; d=0; for j from 0 to #l-1 do (if 1==(e_i)_(l_j) then (d = d + 1)));
-    d=0; for j from 0 to #l-1 do (if 1==(e_(#e-1))_(l_j) then (d = d + 1)); if (d%2)==0 then countEvenNumber = countEvenNumber +1; 
-    if (countEvenNumber -1) == #e then 0 else if (countEvenNumber -1) == 0 then 1 else -1
-    ) 
-
-Parity (Number,Ring,List) := (f,R,a) -> (
-    0
-    ) 
-
-TEST ///
-R=QQ[x_0..x_4,y_0..y_1];
-a={y_0,y_1} ;
-g=x_1*x_2*x_3+4;
-f=x_1*x_2*x_3+x_1*y_0+y_1*y_0-4*x_2*y_1*y_0+4;
-h=y_0+y_0*x_0+y_1;
-assert(Parity(f,R,a) == -1)
-assert(Parity(g,R,a) == 0)
-assert(Parity(h,R,a) == 1)
-assert(Parity(1+2.5*ii,R,a) == 0)
-///
-
 
 ------------------------
 --inversesupermatrix
@@ -479,9 +450,9 @@ Description
     If the coefficient ring a a field, then we get a super algebra.
 
   Example
-    r1=QQ[x_1..x_5]
-    r2=QQ[z_1..z_3]
-    superRing(r1,r2)
+    R1=QQ[x_1..x_5]
+    R2=QQ[z_1..z_3]
+    superRing(R1,R2)
 Caveat
 SeeAlso
 ///
@@ -535,12 +506,15 @@ Description
   Text
     Todo
  Example
-    M1 = matrix {{2,3},{4,5}};
-    M2 = matrix {{2,3,8},{4,5,9}};
-    M3 = matrix {{2,3},{4,5},{10,11}};
-    M4 = matrix {{2,3,18},{5,6,19},{16,17,20}};
-    G = superMatrix(M1,M2,M3,M4);
-    superTrace G
+    R1 = QQ[x_0..x_3];
+    R2 = QQ[z_0..z_2];
+    R = superRing(R1,R2);
+    P1 = matrix{{x_0,x_1},{x_2,x_3}};
+    P2 = matrix{{0,0},{0,0}};
+    P3 = matrix{{0,0},{0,0}};
+    P4 = matrix{{x_1,x_2},{x_0,x_1}};
+    SP = superMatrix(P1,P2,P3,P4);
+    superTrace(SP,R,{z_0,z_1})==x_0-2*x_1+x_3
 Caveat
 SeeAlso
 ///
@@ -586,7 +560,6 @@ Description
   Let we have a super algebra (ring), R=R_0 oplus R_1.
   A homogeneous element of R is an element belongs to R_0 or R_1.
   If x in R_0, we say x is even, and if x in R_1 , we say x is odd.
-
  Example
     R1=QQ[x_0..x_4];
     R2=QQ[e_0,e_1];
@@ -671,23 +644,3 @@ G = superMatrix(M1,M2,M3,M4)
 superTrace G 
 
 viewHelp SuperLinearAlgebra
-
-R1 = QQ[x_0..x_3]
-R2 = QQ[z_0,z_1]
-R = superRing(R1,R2)
-a={z_0,z_1} ;
-g=x_1*x_2*x_3+4;
-f=x_1*x_2*x_3+x_1*z_0+z_1*z_0-4*x_2*z_1*z_0+4;
-h=z_0+z_0*x_0+z_1;
-assert(Parity(f,R,a) == -1)
-assert(Parity(g,R,a) == 0)
-assert(Parity(h,R,a) == 1)
-assert(Parity(1+2.5*ii,R,a) == 0)
-P1 = matrix{{0,0},{0,0}}
-P2 = matrix{{x_0,x_1},{x_2,x_3}}
-P3 = matrix{{x_1,x_2},{x_0,x_1}}
-P4 = matrix{{0,0},{0,0}} 
-SP = superMatrix(P1,P2,P3,P4)
-SS = SP.supermatrix
-Parity(SS_(0,0),R,{z_0})
-
