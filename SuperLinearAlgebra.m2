@@ -39,27 +39,23 @@ export {
  }
 
 --------------------------------------------------------------
---SuperRing (Super commutative ring)  ### y(inverse) need work
+--SuperRing (Super commutative ring) 
 --------------------------------------------------------------
 superRing = method();
 superRing (PolynomialRing,PolynomialRing):= (R1,R2) -> (
          n := #gens R1;
-         y := symbol y;
+         inverseVariable := symbol inverseVariable;
  	 R11 := symbol R11; 
 	 R22 := symbol R22; 
 	 R111 := symbol R111;
-         R11 = (coefficientRing R1)[R1_0..R1_(n-1),y_0..y_(n-1)];
-	 R111 = R11/apply(0..(n-1), i -> sub(R1_i,R11) * y_i - 1);
+         R11 = (coefficientRing R1)[R1_0..R1_(n-1),inverseVariable_0..inverseVariable_(n-1)];
+	 R111 = R11/apply(0..(n-1), i -> sub(R1_i,R11) * inverseVariable_i - 1);
          m := #gens R2;
          w := (for i to m-1 list (0))|toList(0..(m-1));
          R22 = (coefficientRing R2)[R2_0..R2_(m-1), MonomialOrder=>{Weights => w,Lex}, SkewCommutative=>true];
          print concatenate {"is a super commutative ring of dimension", toString n, "|",toString m};
          R111**R22
-         )    
-
-TEST ///
-
-///      
+         )         
  
 ------------------------------------------------------
 --SuperMatrix
@@ -346,7 +342,6 @@ Berezinian (SuperMatrix,Ring) := (SM,R1) ->(
     else error "At least one of the diagonal blocks should be invertible"
     )
  
---superDeterminant = Berezinian ---###
 TEST///
 M1 = matrix{{5,7},{1,2}};
 M2 = matrix{{1,2,3},{4,5,6}};
@@ -433,21 +428,29 @@ SeeAlso
 doc ///
 Key
   superRing
+  (superRing,PolynomialRing,PolynomialRing)
 Headline
-  Super ring
+  a super ring
+Usage
+  R = superRing(R1,R2)
+Inputs
+  R1:PolynomialRing
+  R2:PolynomialRing
+Outputs
+  R:QuotientRing
+    which has both invertible and skew symmetric variables
 Description
   Text
     Let R_1 and R_2 be Two Polynomial rings on different set of variables
     A superRing is a new polynomial ring with three sets of variables. 
     One set comes from R_1 and the second one is the inverse of it.
     For example, if we have x as a variable in R_1,
-    then there is a new variable, say y_0 which is the inverse of $x$.
+    then there is a new variable, say inverseVariable_0 which is the inverse of $x$.
     The third set of variables comes from R_2.
     We redefine this set to be a set of skew-symmetric variables.
     So superRing of R_1 and R_2 is a quotient ring,
     which has both invertible and skew symmetric variables.
     If the coefficient ring a a field, then we get a super algebra.
-
   Example
     R1=QQ[x_1..x_5]
     R2=QQ[z_1..z_3]
@@ -459,9 +462,25 @@ SeeAlso
 
 doc ///
 Key 
+  superMatrix
   SuperMatrix
+  supermatrix
+  (superMatrix,Matrix,Matrix,Matrix,Matrix)
+  sourceM1
+  sourceM2
+  targetM1
+  targetM3
 Headline
-  Supermatrix
+  super matrix
+Usage
+  G = superMatrix(M1,M2,M3,M4)
+Inputs
+  M1:Matrix
+  M2:Matrix
+  M3:Matrix
+  M4:Matrix
+Outputs
+  G:SuperMatrix
 Description
   Text
    Let M_1,M_2,M_3,M_4 are four matrices. 
@@ -634,7 +653,6 @@ debug (SuperLinearAlgebra)
 
 check"SuperLinearAlgebra"
 installPackage"SuperLinearAlgebra"
-
 M1 = matrix {{2,3},{4,5}}
 M2 = matrix {{2,3,8},{4,5,9}}
 M3 = matrix {{2,3},{4,5},{10,11}}
