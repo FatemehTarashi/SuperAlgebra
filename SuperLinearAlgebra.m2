@@ -419,7 +419,9 @@ Headline
   Package for super algebra
 Description
   Text
-    This Package is to do the computation in superalgebras, or super vector spaces. The computations are taken in a superRing, which is a ring with both symmetric and antisymmetric variables.
+    This Package is to do the computation in superalgebras, or super vector spaces. 
+	The computations are taken in a superRing, which is a ring with both symmetric and antisymmetric variables.
+	To see the definitions and theorems, see Varadarajan, V. S. (2004). "Supersymmetry for Mathematicians: An Introduction" (Vol. 11). American Mathematical Soc.
 Caveat
 SeeAlso
 ///
@@ -532,11 +534,14 @@ Outputs
   P:QuotientRing
 Description
   Text
-	Let $A^{p|q}=Ax_1\oplus \cdots \oplus Ax_p \oplus Ae_1\oplus\cdots\oplus Ae_q$ be a free module over $A$, 
+	Let $A^{p|q}=Ax_1 oplus cdots oplus Ax_p oplus Ae_1oplus cdots oplus Ae_q$ be a free module over $A$, 
 	where $x_i$s are even and $e_j$s are odd generators. A (homogeneous) morphism $T:A^{p|q}\rightarrow A^{r|s}$ has a matrix representation. 
 	Denote the matrix by $T$ then we have
-	$T=\begin{bmatrix}T_1 & T_2\\T_3 & T_4\end{bmatrix}$.
-    The super trace $\mathrm{str}$ of $T$ is defined by $\mathrm{str}(T)= \mathrm{tr}(T_1)-(-1)^{p(T)}\mathrm{tr}(T_4)$.
+	T=matrix{{T_1,T_2},{T_3,T_4}}
+    The super trace of $T$ is defined by $superTrace(T)= Trace(T_1)-(-1)^{p(T)} Trace(T_4)$.
+	The inputs of this function are a superMatrix, a ring, which should have skew-symmetric variables, and a list, 
+	which is the list of skew-symmetric variables that are used in the superMatrix. 
+	In case that the superMatrix is homogeneous, the output is the super trace of the superMatrix.
  Example
     R1 = QQ[x_0..x_3];
     R2 = QQ[z_0..z_2];
@@ -701,8 +706,8 @@ Outputs
     0 for even, 1 for odd and -1 for Nonhomogeneous
 Description
  Text
-  Let $A^{p|q}=Ax_1\oplus \cdots \oplus Ax_p \oplus Ae_1\oplus\cdots\oplus Ae_q$ be a free module over $A$, where $x_i$s are even and $e_j$s are odd generators. A morphism $T:A^{p|q}\rightarrow A^{r|s}$ has a matrix representation. Denote the matrix by $T$ then we have
-	$T=\begin{bmatrix} T_1 & T_2\\ T_3 & T_4\end{bmatrix}$.
+	Let $A^{p|q}=Ax_1\oplus \cdots \oplus Ax_p \oplus Ae_1\oplus\cdots\oplus Ae_q$ be a free module over $A$, where $x_i$s are even and $e_j$s are odd generators. A morphism $T:A^{p|q}\rightarrow A^{r|s}$ has a matrix representation. Denote the matrix by $T$ then we have
+	T=matrix{{T_1,T_2},{T_3 & T_4}}.
 	The matrix (morphism) $T$ is said to be even (odd) if the blocks $T_1$ and $T_4$ are even, and $T_2$ and $T_3$ are odd ($T_1$ and $T_4$ are odd, and $T_2$ and $T_3$ are even).
 	Note that if $A$ is an algebra, i.e., it doesn't have odd involution, then to have an even (odd) matrix $T$, we should have $T_3=0$ and $T_2=0$ ($T_1=0$ and $T_4=0$).
  Example
