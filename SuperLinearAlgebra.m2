@@ -19,19 +19,23 @@ newPackage(
 --------------------
 
 export {
-   -- Methods
-   "superRing",
-   "superMatrix",
-   "superTrace",
-   "Berezinian",
-   "isSkewSymmetric",
-   "Parity", 
-   "SuperMatrixParity",
-   "inverseSuperMatrix", 
-   
-   --Types and keys 
-   "SuperMatrix",
-   "supermatrix", "targetM1", "targetM3", "sourceM1", "sourceM2"
+    --Types
+        "SuperMatrix",
+    --Methods
+        "Berezinian",
+        "inverseSuperMatrix",
+        "isSkewSymmetric",
+        "Parity",
+        "superMatrix",
+        "SuperMatrixParity",
+        "superRing",
+        "superTrace",
+    --Symbols
+        "supermatrix",
+        "targetM1",
+        "targetM3", 
+	"sourceM1", 
+	"sourceM2"
  }
 
 --------------------------------------------------------------
@@ -157,15 +161,6 @@ assert(Parity(f,R,a) == -1)
 assert(Parity(g,R,a) == 0)
 assert(Parity(h,R,a) == 1)
 assert(Parity(1+2.5*ii,R,a) == 0)
-
-P1 = matrix{{0,0},{0,0}};
-P2 = matrix{{x_0,x_1},{x_2,x_3}};
-P3 = matrix{{x_1,x_2},{x_0,x_1}};
-P4 = matrix{{0,0},{0,0}} ;
-SP = superMatrix(P1,P2,P3,P4);
-SS = SP.supermatrix;
-t = SS_(0,0);
-assert(Parity(0,R,{z_0}) == 0)
 ///
 ----------------------------------
 --SuperMatrixParity
@@ -315,16 +310,20 @@ P3 = matrix{{0,0},{0,0}};
 P4 = matrix{{x_1,x_2},{x_0,x_1}};
 SP = superMatrix(P1,P2,P3,P4);
 assert(superTrace(SP,R,{z_0,z_1})==x_0-2*x_1+x_3)
--*
+
+R1 = QQ[x_0..x_3]
+R2 = QQ[z_0..z_2]
+R = superRing(R1,R2)
 T1 = R[n_0..n_3];
 T2 = R[e_0..e_3];
-T = superRing(T1,T2);
-M1 = matrix{{n_0,n_1},{n_2,n_3}};
-M2 = matrix{{e_0,e_1},{n_0*e_0,n_1*e_1}};
-M3 = matrix{{e_3*n_3,e_1},{e_0,e_2*n_2}};
-M4 = matrix{{n_1,n_3},{n_0,n_2+n_3}};
-SM = superMatrix(M1,M2,M3,M4);
-assert(superTrace(SM,T,{e_0,e_1,e_2,e_3})==n_0-n_1-n_2)*-
+T  = superRing(T1,T2)
+M1 = matrix{{n_0,n_1},{n_2,n_3}}
+M2 = matrix{{e_0,e_1},{n_0*e_0,n_1*e_1}}
+M3 = matrix{{e_3*n_3,e_1},{e_0,e_2*n_2}}
+M4 = matrix{{n_1,n_3},{n_0,n_2+n_3}}
+SM = superMatrix(M1,M2,M3,M4)
+a = {e_0,e_1,e_2,e_3}
+assert(superTrace(SM,T,a)==n_0-n_1-n_2)
 ///
 
 --------------------
