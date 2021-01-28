@@ -27,7 +27,7 @@ export {
         "isSkewSymmetric",
         "Parity",
         "superMatrix",
-        "SuperMatrixParity",
+        "superMatrixParity",
         "superRing",
         "superTrace",
     --Symbols
@@ -165,8 +165,8 @@ assert(Parity(1+2.5*ii,R,a) == 0)
 ----------------------------------
 --SuperMatrixParity
 --------------------------------
-SuperMatrixParity = method();
-SuperMatrixParity(SuperMatrix,Ring,List) := (SM,R1,a) ->(
+superMatrixParity = method();
+superMatrixParity(SuperMatrix,Ring,List) := (SM,R1,a) ->(
     m1 := symbol m1;
     m2 := symbol m2;
     m3 := symbol m3;
@@ -259,7 +259,7 @@ D2 = matrix{{z_0,z_1},{x_0*z_0,x_1*z_1}};
 D3 = matrix{{z_2*x_3,z_1},{z_0,z_2*x_2}};
 D4 = matrix{{x_1,x_3},{x_0,x_2+x_3}};
 SD = superMatrix(D1,D2,D3,D4);
-assert(SuperMatrixParity(SD,R,{z_0,z_1,z_2}) == -1)
+assert(superMatrixParity(SD,R,{z_0,z_1,z_2}) == -1)
 
 P1 = matrix{{0,0},{0,0}};
 P2 = matrix{{x_0,x_1},{x_2,x_3}};
@@ -267,7 +267,7 @@ P3 = matrix{{x_1,x_2},{x_0,x_1}};
 P4 = matrix{{0,0},{0,0}};
 SP = superMatrix(P1,P2,P3,P4);
 SS = SP.supermatrix;
-assert(SuperMatrixParity(SP,R,{z_0,z_1,z_2}) == 1)
+assert(superMatrixParity(SP,R,{z_0,z_1,z_2}) == 1)
 
 T1 = R[n_0..n_3];
 T2 = R[e_0..e_3];
@@ -277,14 +277,14 @@ M2 = matrix{{e_0,e_1},{n_0*e_0,n_1*e_1}};
 M3 = matrix{{e_3*n_3,e_1},{e_0,e_2*n_2}};
 M4 = matrix{{n_1,n_3},{n_0,n_2+n_3}};
 SM = superMatrix(M1,M2,M3,M4);
-assert(SuperMatrixParity(SM,T,{e_0,e_1,e_2,e_3}) == 0)
+assert(superMatrixParity(SM,T,{e_0,e_1,e_2,e_3}) == 0)
 ---
 E1 = matrix{{e_0,n_1},{n_2,n_3}};
 E2 = matrix{{e_0,e_1},{n_0+e_0,n_1*e_1}};
 E3 = matrix{{e_3*n_3,e_1},{e_0,e_2*n_2}};
 E4 = matrix{{n_1,n_3},{n_0,n_2+n_3}};
 G = superMatrix(E1,E2,E3,E4);
-assert(SuperMatrixParity(G,T,{e_0,e_1,e_2,e_3}) == -1)
+assert(superMatrixParity(G,T,{e_0,e_1,e_2,e_3}) == -1)
 ///
 --------------------
 --Supertrace           
@@ -293,9 +293,9 @@ superTrace = method ();
 superTrace (SuperMatrix,Ring,List) :=(SM,R1,a)->(
     Minor11 := submatrix(SM.supermatrix, {0..(SM.targetM1 -1)}, {0..(SM.sourceM1 -1)});
     Minor22 := submatrix(SM.supermatrix, {SM.targetM1..(SM.targetM1 + SM.targetM3 -1)}, {SM.sourceM1..(SM.sourceM1 + SM.sourceM2 -1)});
-    if (SuperMatrixParity(SM,R1,a)=!= -1) then
+    if (superMatrixParity(SM,R1,a)=!= -1) then
     (par := symbol par;
-     par = SuperMatrixParity(SM,R1,a);
+     par = superMatrixParity(SM,R1,a);
      trace Minor11 -(-1)^par*trace Minor22)
     else error "SuperMatrix is not superhomogeneous"
     )
