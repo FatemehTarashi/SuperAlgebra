@@ -419,7 +419,9 @@ Headline
   Package for super algebra
 Description
   Text
-    Todo
+     This Package is to do the computation in superalgebras, or super vector spaces. \break
+     The computations are taken in a superRing, which is a ring with both symmetric and antisymmetric variables. \break
+     To see the definitions and theorems, see Varadarajan, V. S. (2004). "Supersymmetry for Mathematicians: An Introduction" (Vol. 11). American Mathematical Soc.\break
 Caveat
 SeeAlso
 ///
@@ -441,16 +443,16 @@ Outputs
     which has both invertible and skew symmetric variables, superRing
 Description
   Text
-    Let R_1 and R_2 be Two Polynomial rings on different set of variables
+    Let $R_1$ and $R_2$ be Two Polynomial rings on different set of variables
     A superRing is a new polynomial ring with three sets of variables. 
-    One set comes from R_1 and the second one is the inverse of it.
-    For example, if we have x as a variable in R_1,
-    then there is a new variable, say inverseVariable_0 which is the inverse of $x$.
-    The third set of variables comes from R_2.
+    One set comes from $R_1$ and the second one is the inverse of it.\break
+    For example, if we have x as a variable in $R_1$,
+    then there is a new variable, say $inverseVariable_0$ which is the inverse of $x$.
+    The third set of variables comes from $R_2$.
     We redefine this set to be a set of skew-symmetric variables.
-    So superRing of R_1 and R_2 is a quotient ring,
+    So superRing of $R_1$ and $R_2$ is a quotient ring,
     which has both invertible and skew symmetric variables.
-    If the coefficient ring a a field, then we get a super algebra.
+    If the coefficient ring is a field, then we get a super algebra.
   Example
     R1=QQ[x_1..x_5]
     R2=QQ[z_1..z_3]
@@ -462,8 +464,8 @@ SeeAlso
 
 doc ///
 Key 
-  superMatrix
   SuperMatrix
+  superMatrix
   supermatrix
   (superMatrix,Matrix,Matrix,Matrix,Matrix)
   sourceM1
@@ -483,26 +485,27 @@ Outputs
   G:SuperMatrix
 Description
   Text
-   Let M_1,M_2,M_3,M_4 are four matrices. 
-   The number of rows in M_1 and M_2,
-   and those of M_3 and M_4 should be equal.
-   Also, the number of columns of M_1 and M_3,
-   and those of M_2 and M_4 must be equal.
+   Let $M_1,M_2,M_3,M_4$ are four matrices. 
+   The number of rows in $M_1$ and $M_2$,
+   and those of $M_3$ and $M_4$ should be equal.
+   Also, the number of columns of $M_1$ and $M_3$,
+   and those of M_2 and M_4 must be equal./break
    The idea is to define a (super) Matrix,
-   which can be considered as p|q\times r|s matrix.
+   which can be considered as $p|q\times r|s$ matrix.
    This super Matrix can be a morphism between super
-   modules A^{p|q} and A^{r|s} over super algebra A. 
+   modules $A^{p|q}$ and $A^{r|s}$ over super algebra $A$.  \break
 
    The function merges the matrices M_1 and M_2, and also M_3 and M_4. 
    Finally it merges two new matrices and 
    make a new matrix with the first four matrices as
-   the blocks of the new matrix, say matrix {M_1, M_2, M_3,M_4}.
-   The key supermatrix shows the result matrix created as above.
-   The key targetM1 shows the number of first part rows.
-   The key targetM3 shows the number of the rows of the second part
-   The key sourceM1 shows the number of columns in the first part
-   The key sourceM2 shows the number of columns in the second part.
-
+   the blocks of the new matrix, say $\begin{pmatrix}
+     M1&M2\\
+     M3&M4\end{pmatrix}$.  \break
+   The key supermatrix shows the result matrix created as above. \break
+   The key targetM1 shows the number of first part rows. \break
+   The key targetM3 shows the number of the rows of the second part.  \break
+   The key sourceM1 shows the number of columns in the first part.  \break
+   The key sourceM2 shows the number of columns in the second part.  \break
  Example
     M1 = matrix {{1,2},{5,6},{9,10}}
     M2 = matrix {{3,4},{7,8},{11,12}}
@@ -532,7 +535,16 @@ Outputs
   P:QuotientRing
 Description
   Text
-    Todo
+    Let $A^{p|q}=Ax_1 oplus cdots oplus Ax_p oplus Ae_1oplus cdots oplus Ae_q$ be a free module over $A$, 
+    where $x_i$s are even and $e_j$s are odd generators. A (homogeneous) morphism $T:A^{p|q}\rightarrow A^{r|s}$ has a matrix representation. 
+    Denote the matrix by $T$ then we have $T=\begin{pmatrix}
+     T1&T2\\
+     T3&T4\end{pmatrix}$.  \break
+    The super trace of $T$ is defined by $superTrace(T)= Trace(T_1)-(-1)^{p(T)} Trace(T_4)$.
+    The inputs of this function are a superMatrix, a ring, which should have skew-symmetric variables, and a list, 
+    which is the list of skew-symmetric variables that are used in the superMatrix. 
+    In case that the superMatrix is homogeneous, the output is the super trace of the superMatrix.
+	
  Example
     R1 = QQ[x_0..x_3];
     R2 = QQ[z_0..z_2];
@@ -567,12 +579,14 @@ Description
   then we can define Berezinian (as a kind of super Determinant).
   The formula for the Berezinian is different base on which block is invertible.
   But it is shown that the two formulas are equivalent if two blocks are invertible.
-  If M= matrix {M_1 , M_2, M_3 , M_4} is a super Matrix, and
-  M_4 is invertible, then 
-  Ber(M)= det(M_1-M_2M^{-1}_4M_3) det(M_4)^{-1}.
+  If $M=\begin{pmatrix}
+     M1&M2\\
+     M3&M4\end{pmatrix}$.  is a super Matrix, and
+  $M_4$ is invertible, then 
+  $Ber(M)= det(M_1-M_2M^{-1}_4M_3) det(M_4)^{-1}$.\break
   
-  If M_1 is invertible, then
-  Ber(M) = det(M_4-M_3M_1^{-1}M_2)^{-1} det(M_1).
+  If $M_1$ is invertible, then
+  $Ber(M) = det(M_4-M_3M_1^{-1}M_2)^{-1} det(M_1)$.
  Example
     M1 = matrix{{5,7},{1,2}}
     M2 = matrix{{1,2,3},{4,5,6}}
@@ -604,9 +618,9 @@ Outputs
     0 for even, 1 for odd and -1 for Nonhomogeneous
 Description
  Text
-  Let we have a super algebra (ring), R=R_0 oplus R_1.
-  A homogeneous element of R is an element belongs to R_0 or R_1.
-  If x in R_0, we say x is even, and if x in R_1 , we say x is odd.
+  Let we have a super algebra (ring), $R=R_0$ oplus $R_1$.
+  A homogeneous element of $R$ is an element belongs to $R_0$ or $R_1$.
+  This function has three outputs, -1 for non-homogeneous, 0 for homogeneous and even, and 1 for homogeneous and odd elements.
  Example
     R1=QQ[x_0..x_4];
     R2=QQ[e_0,e_1];
@@ -635,14 +649,16 @@ Outputs
   M:Matrix
 Description
  Text
-  A super Matrix M=matrix{M_1, M_2, M_3, M_4}
-  is invertible, if both the diagonal blocks, M_1 and M_4 are invertible.
+  A super Matrix $M={{M1,M2},{M3,M4}}$ 
+  is invertible, if both the diagonal blocks, $M_1$ and $M_4$ are invertible. \break
   In this case, the inverse is given by a blocked matrix,
-  T=matrix{T_1, T_2, T_3, T_4}, where
-  T_1=(M_1 − M_2M^{-1}_4 M_3)^{-1},
-  T_2=−M^{-1}_1 M_2(M_4 − M_3M^{-1}_1 M_2)^{-1},
-  T_3=−M^{-1}_4 M_3(M_1 − M_2M^{-1}_4 M_3)^{-1}, and
-  T_4=(M_4 − M_3M^{-1}_1 M_2)^{-1}.
+  $T=\begin{pmatrix}
+     T1&T2\\
+     T3&T4\end{pmatrix}$, where
+  $T_1=(M_1 − M_2M^{-1}_4 M_3)^{-1}$,
+  $T_2=−M^{-1}_1 M_2(M_4 − M_3M^{-1}_1 M_2)^{-1}$,
+  $T_3=−M^{-1}_4 M_3(M_1 − M_2M^{-1}_4 M_3)^{-1}$, and
+  $T_4=(M_4 − M_3M^{-1}_1 M_2)^{-1}$.
  Example
     M1 = matrix{{5,7},{1,2}};
     M2 = matrix{{1,2,3},{4,5,6}};
@@ -669,7 +685,8 @@ Outputs
   O:Boolean
 Description
  Text
-  todo
+  This function checks if a ring has skew symmetric variables or not. This function has two Boolian valued outputs, 
+  true if the ring has skew-symmetric variables, and false if it does not.
  Example
   R1 = QQ[x_0..x_3];
   R2 = QQ[z_0..z_2];
@@ -687,16 +704,23 @@ Key
 Headline
   super Matrix Parity
 Usage
-  N = isSkewSymmetric R
+  N = superMatrixParity(SM,R,L)
 Inputs
+  SM:SuperMatrix
   R:Ring
     superRing
+  L:List
 Outputs
   N:Number
     0 for even, 1 for odd and -1 for Nonhomogeneous
 Description
  Text
-  todo
+  Let $A^{p|q}=Ax_1\oplus \cdots \oplus Ax_p \oplus Ae_1\oplus\cdots\oplus Ae_q$ be a free module over $A$, where $x_i$s are even and $e_j$s are odd generators. A morphism $T:A^{p|q}\rightarrow A^{r|s}$ has a matrix representation. Denote the matrix by $T$ then we have
+  $T=\begin{pmatrix}
+     T1&T2\\
+     T3&T4\end{pmatrix}$. \break
+  The matrix (morphism) $T$ is said to be even (odd) if the blocks $T_1$ and $T_4$ are even, and $T_2$ and $T_3$ are odd ($T_1$ and $T_4$ are odd, and $T_2$ and $T_3$ are even).
+  Note that if $A$ is an algebra, i.e., it doesn't have odd involution, then to have an even (odd) matrix $T$, we should have $T_3=0$ and $T_2=0$ ($T_1=0$ and $T_4=0$).
  Example
   R1 = QQ[x_0..x_3];
   R2 = QQ[z_0..z_2];
