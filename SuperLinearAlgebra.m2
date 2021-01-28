@@ -438,7 +438,7 @@ Inputs
   R2:PolynomialRing
 Outputs
   R:QuotientRing
-    which has both invertible and skew symmetric variables
+    which has both invertible and skew symmetric variables, superRing
 Description
   Text
     Let R_1 and R_2 be Two Polynomial rings on different set of variables
@@ -518,8 +518,18 @@ SeeAlso
 doc ///
 Key 
   superTrace
+  (superTrace,SuperMatrix,Ring,List)
 Headline
   super trace
+Usage
+  P = superTrace(SM,R,L)
+Inputs
+  SM:SuperMatrix
+  R:Ring
+    superRing
+  L:List
+Outputs
+  P:QuotientRing
 Description
   Text
     Todo
@@ -532,7 +542,7 @@ Description
     P3 = matrix{{0,0},{0,0}};
     P4 = matrix{{x_1,x_2},{x_0,x_1}};
     SP = superMatrix(P1,P2,P3,P4);
-    superTrace(SP,R,{z_0,z_1})==x_0-2*x_1+x_3
+    superTrace(SP,R,{z_0,z_1})
 Caveat
 SeeAlso
 ///
@@ -541,8 +551,16 @@ SeeAlso
 doc ///
 Key 
   Berezinian
+  (Berezinian,SuperMatrix,Ring)
 Headline
   Berezinian
+Usage
+  N = Berezinian(G,R)
+Inputs
+  G:SuperMatrix
+  R:Ring
+Outputs
+  N:Number
 Description
  Text
   If in a super Matrix, one of the first or the second diagonal block is invertible,
@@ -571,8 +589,19 @@ SeeAlso
 doc ///
 Key 
   Parity
+  (Parity,RingElement,Ring,List)
 Headline
   Parity
+Usage
+  N = Parity(f,R,L)
+Inputs
+  f:RingElement
+  R:Ring
+   superRing
+  L:List
+Outputs
+  N:Number
+    0 for even, 1 for odd and -1 for Nonhomogeneous
 Description
  Text
   Let we have a super algebra (ring), R=R_0 oplus R_1.
@@ -582,21 +611,28 @@ Description
     R1=QQ[x_0..x_4];
     R2=QQ[e_0,e_1];
     R= superRing(R1,R2)
-    a={e_0,e_1}
+    L={e_0,e_1}
     f=x_1*x_2*x_3+x_1*e_0+e_1*e_0-4*x_2*e_1*e_0+4
-    Parity(f,R,a)
+    Parity(f,R,L)
     g=x_1*x_2*x_3+e_0*e_1+4;
-    Parity(g,R,a)
+    Parity(g,R,L)
 Caveat
 SeeAlso
 ///
 
-
 doc ///
 Key 
   inverseSuperMatrix
+  (inverseSuperMatrix,SuperMatrix,Ring) 
 Headline
   InverseSuperMatrix
+Usage
+  N = inverseSuperMatrix(G,R)
+Inputs
+  G:SuperMatrix
+  R:Ring
+Outputs
+  M:Matrix
 Description
  Text
   A super Matrix M=matrix{M_1, M_2, M_3, M_4}
@@ -608,7 +644,6 @@ Description
   T_3=−M^{-1}_4 M_3(M_1 − M_2M^{-1}_4 M_3)^{-1}, and
   T_4=(M_4 − M_3M^{-1}_1 M_2)^{-1}.
  Example
-    test
     M1 = matrix{{5,7},{1,2}};
     M2 = matrix{{1,2,3},{4,5,6}};
     M3 = matrix{{3,4},{5,6},{7,8}};
@@ -619,25 +654,62 @@ Caveat
 SeeAlso
 ///
 
--- template for function documentation
---doc ///
---Key
---Headline
---Usage
---Inputs
---Outputs
---Consequences
---  Item
---Description
---  Text
---  Code
---  Pre
---  Example
---  CannedExample
---Subnodes
---Caveat
---SeeAlso
---///
+doc ///
+Key 
+  isSkewSymmetric
+  (isSkewSymmetric,Ring) 
+Headline
+  is Skew Symmetric
+Usage
+  O = isSkewSymmetric R
+Inputs
+  R:Ring
+    superRing
+Outputs
+  O:Boolean
+Description
+ Text
+  todo
+ Example
+  R1 = QQ[x_0..x_3];
+  R2 = QQ[z_0..z_2];
+  R = superRing(R1,R2)
+  isSkewSymmetric R
+Caveat
+SeeAlso
+///
+
+
+doc ///
+Key 
+  superMatrixParity
+  (superMatrixParity,SuperMatrix,Ring,List) 
+Headline
+  super Matrix Parity
+Usage
+  N = isSkewSymmetric R
+Inputs
+  R:Ring
+    superRing
+Outputs
+  N:Number
+    0 for even, 1 for odd and -1 for Nonhomogeneous
+Description
+ Text
+  todo
+ Example
+  R1 = QQ[x_0..x_3];
+  R2 = QQ[z_0..z_2];
+  R = superRing(R1,R2);
+  D1 = matrix{{x_0,x_1},{x_2,x_3}};
+  D2 = matrix{{z_0,z_1},{x_0*z_0,x_1*z_1}};
+  D3 = matrix{{z_2*x_3,z_1},{z_0,z_2*x_2}};
+  D4 = matrix{{x_1,x_3},{x_0,x_2+x_3}};
+  SM = superMatrix(D1,D2,D3,D4);
+  superMatrixParity(SM,R,{z_0,z_1,z_2})
+Caveat
+SeeAlso
+///
 
 end
 
