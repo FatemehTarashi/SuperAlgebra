@@ -535,7 +535,7 @@ Outputs
   P:QuotientRing
 Description
   Text
-    Let $A^{p|q}=Ax_1 oplus cdots oplus Ax_p oplus Ae_1oplus cdots oplus Ae_q$ be a free module over $A$, 
+    Let $A^{p|q}=Ax_1 \oplus \cdots \oplus Ax_p \oplus Ae_1\oplus \cdots \oplus Ae_q$ be a free module over $A$, 
     where $x_i$s are even and $e_j$s are odd generators. A (homogeneous) morphism $T:A^{p|q}\rightarrow A^{r|s}$ has a matrix representation. 
     Denote the matrix by $T$ then we have $T=\begin{pmatrix}
      T1&T2\\
@@ -618,7 +618,7 @@ Outputs
     0 for even, 1 for odd and -1 for Nonhomogeneous
 Description
  Text
-  Let we have a super algebra (ring), $R=R_0$ oplus $R_1$.
+  Let we have a super algebra (ring), $R=R_0 \oplus R_1$.
   A homogeneous element of $R$ is an element belongs to $R_0$ or $R_1$.
   This function has three outputs, -1 for non-homogeneous, 0 for homogeneous and even, and 1 for homogeneous and odd elements.
  Example
@@ -632,6 +632,7 @@ Description
     Parity(g,R,L)
 Caveat
 SeeAlso
+  superMatrixParity
 ///
 
 doc ///
@@ -675,7 +676,7 @@ Key
   isSkewSymmetric
   (isSkewSymmetric,Ring) 
 Headline
-  is Skew Symmetric
+  whether something is Skew Symmetric
 Usage
   O = isSkewSymmetric R
 Inputs
@@ -733,6 +734,7 @@ Description
   superMatrixParity(SM,R,{z_0,z_1,z_2})
 Caveat
 SeeAlso
+  Parity
 ///
 
 end
