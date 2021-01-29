@@ -24,7 +24,6 @@ export {
     --Methods
         "Berezinian",
         "inverseSuperMatrix",
-        "isSkewSymmetric",
         "Parity",
         "superMatrix",
         "superMatrixParity",
@@ -97,31 +96,6 @@ assert(G.sourceM1 == 2)
 assert(G.sourceM2 == 2)
 ///
 
----------------------------------------------------
---isSkewSymmetric            --For Polynomial Rings
---------------------------------------------------
-isSkewSymmetric = method();
-isSkewSymmetric Ring := (R1)->(
-          i1 := symbol i1;
-          i1 = numgens R1;
-          L1 := apply(numgens R1, i -> R1_i^2);
-          O1 := symbol O1;
-          e1 := symbol e1;
-          O1 = 0;
-          e1 = 0;
-          for j from 0 to (i1-1) do(if take(L1,{j,j})=={0} then O1=O1+1);
-          if O1 =!= 0 then true else false
-           )
-
-TEST ///
-R1 = QQ[x_0..x_3];
-R2 = QQ[z_0..z_2];
-R = superRing(R1,R2);
-assert(isSkewSymmetric R == true)
-S=QQ[x_0..x_5];
-assert(isSkewSymmetric S == false)
-///
-
 --------------------
 --Parity  
 -------------------- 
@@ -183,7 +157,7 @@ superMatrixParity(SuperMatrix,Ring,List) := (SM,R1,a) ->(
     Minor22 := submatrix(SM.supermatrix, {r1..(r1 + r2 - 1)}, {c1..(c1 + c2 - 1)});
     Minor21 := submatrix(SM.supermatrix, {r1..(r1 + r2 - 1)}, {0..(c1 - 1)});
     Minor12 := submatrix(SM.supermatrix, {0..(r1 - 1)}, {c1..(c1 + c2 - 1)});
-    if isSkewSymmetric(R1)==true then
+    if isSkewCommutative(R1)==true then
     (fij := symbol fij;
      cout33:= symbol cout33;
      cout44:= symbol cout44;
@@ -235,7 +209,7 @@ superMatrixParity(SuperMatrix,Ring,List) := (SM,R1,a) ->(
 	  if count44=!=0 then (return -1) else if count4==0 then m4=0 else m4=1;
       R2 := symbol R2;
       R2 = coefficientRing R1;
-      if (isSkewSymmetric(R2)==true) then(
+      if (isSkewCommutative(R2)==true) then(
        if (m1==0 and m4==0 and m2==1 and m3==1)then ( return 0)
        else if (m1==1 and m4==1 and m2==0 and m3==0) then (return 1) else (return -1))
        else(
@@ -432,7 +406,7 @@ Key
   superRing
   (superRing,PolynomialRing,PolynomialRing)
 Headline
-  a super ring
+    Makes a super ring from two polynomial rings.
 Usage
   R = superRing(R1,R2)
 Inputs
@@ -473,7 +447,7 @@ Key
   targetM1
   targetM3
 Headline
-  super matrix
+    Makes a super matrix from its four blocks.
 Usage
   G = superMatrix(M1,M2,M3,M4)
 Inputs
@@ -523,7 +497,7 @@ Key
   superTrace
   (superTrace,SuperMatrix,Ring,List)
 Headline
-  super trace
+    Super trace of a homogeneous super matrix.
 Usage
   P = superTrace(SM,R,L)
 Inputs
@@ -565,7 +539,7 @@ Key
   Berezinian
   (Berezinian,SuperMatrix,Ring)
 Headline
-  Berezinian
+  Computes the Berezinian of a supermatrix.
 Usage
   N = Berezinian(G,R)
 Inputs
@@ -605,7 +579,7 @@ Key
   Parity
   (Parity,RingElement,Ring,List)
 Headline
-  Parity
+  Parity of an element of a super ring.
 Usage
   N = Parity(f,R,L)
 Inputs
@@ -640,7 +614,7 @@ Key
   inverseSuperMatrix
   (inverseSuperMatrix,SuperMatrix,Ring) 
 Headline
-  InverseSuperMatrix
+  The inverse of a super matrix.
 Usage
   N = inverseSuperMatrix(G,R)
 Inputs
@@ -673,37 +647,10 @@ SeeAlso
 
 doc ///
 Key 
-  isSkewSymmetric
-  (isSkewSymmetric,Ring) 
-Headline
-  whether something is Skew Symmetric
-Usage
-  O = isSkewSymmetric R
-Inputs
-  R:Ring
-    superRing
-Outputs
-  O:Boolean
-Description
- Text
-  This function checks if a ring has skew symmetric variables or not. This function has two Boolian valued outputs, 
-  true if the ring has skew-symmetric variables, and false if it does not.
- Example
-  R1 = QQ[x_0..x_3];
-  R2 = QQ[z_0..z_2];
-  R = superRing(R1,R2)
-  isSkewSymmetric R
-Caveat
-SeeAlso
-///
-
-
-doc ///
-Key 
   superMatrixParity
   (superMatrixParity,SuperMatrix,Ring,List) 
 Headline
-  super Matrix Parity
+  Parity of a super Matrix.
 Usage
   N = superMatrixParity(SM,R,L)
 Inputs
