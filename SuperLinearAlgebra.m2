@@ -57,20 +57,19 @@ superRing (PolynomialRing, PolynomialRing) := (R1, R2) -> (
 -------------------------------------------
 
 SuperMatrix = new Type of MutableHashTable;
-superMatrix = method();
-superMatrix (Matrix, Matrix, Matrix, Matrix) := (M00,M01,M10,M11)-> (
+superMatrixGenerator = method();
+superMatrixGenerator (Matrix, Matrix, Matrix, Matrix) := (M00,M01,M10,M11)-> (
     new SuperMatrix from {
         supermatrix => matrix{{M00,M01},{M10,M11}}
     }
 )
-
 
 TEST ///
 M1 = matrix {{1, 2}, {5, 6}, {9, 10}};
 M2 = matrix {{3, 4}, {7, 8}, {11, 12}};
 M3 = matrix {{13, 14}, {17, 18}};
 M4 = matrix {{15, 16}, {19, 20}};
-G = superMatrix(M1,M2,M3,M4)
+G = superMatrixGenerator(M1,M2,M3,M4)
 assert(G.supermatrix == matrix {{1, 2, 3, 4}, {5, 6, 7, 8}, {9, 10, 11, 12}, {13, 14, 15, 16}, {17, 18, 19, 20}})
 ///
 
@@ -227,14 +226,14 @@ D1 = matrix{{x_0, x_1}, {x_2, x_3}};
 D2 = matrix{{z_0, z_1}, {x_0*z_0, x_1*z_1}};
 D3 = matrix{{z_2*x_3, z_1}, {z_0, z_2*x_2}};
 D4 = matrix{{x_1, x_3}, {x_0, x_2+x_3}};
-SD = superMatrix(D1, D2, D3, D4);
+SD = superMatrixGenerator(D1, D2, D3, D4);
 assert(superMatrixParity(SD, R, {z_0, z_1, z_2}) == -1)
 
 P1 = matrix{{0, 0}, {0, 0}};
 P2 = matrix{{x_0, x_1}, {x_2, x_3}};
 P3 = matrix{{x_1, x_2}, {x_0, x_1}};
 P4 = matrix{{0, 0}, {0, 0}};
-SP = superMatrix(P1, P2, P3, P4);
+SP = superMatrixGenerator(P1, P2, P3, P4);
 SS = SP.supermatrix;
 assert(superMatrixParity(SP, R, {z_0, z_1, z_2}) == 1)
 
@@ -245,14 +244,14 @@ M1 = matrix{{n_0, n_1}, {n_2, n_3}};
 M2 = matrix{{e_0, e_1}, {n_0*e_0, n_1*e_1}};
 M3 = matrix{{e_3*n_3, e_1}, {e_0, e_2*n_2}};
 M4 = matrix{{n_1, n_3}, {n_0, n_2+n_3}};
-SM = superMatrix(M1, M2, M3, M4);
+SM = superMatrixGenerator(M1, M2, M3, M4);
 assert(superMatrixParity(SM, T, {e_0, e_1, e_2, e_3}) == 0)
 
 E1 = matrix{{e_0, n_1}, {n_2, n_3}};
 E2 = matrix{{e_0, e_1}, {n_0+e_0, n_1*e_1}};
 E3 = matrix{{e_3*n_3, e_1}, {e_0, e_2*n_2}};
 E4 = matrix{{n_1, n_3}, {n_0, n_2+n_3}};
-G = superMatrix(E1, E2, E3, E4);
+G = superMatrixGenerator(E1, E2, E3, E4);
 assert(superMatrixParity(G, T, {e_0, e_1, e_2, e_3}) == -1)
 ///
 
@@ -279,7 +278,7 @@ P1 = matrix{{x_0, x_1}, {x_2, x_3}};
 P2 = matrix{{0, 0}, {0, 0}};
 P3 = matrix{{0, 0}, {0, 0}};
 P4 = matrix{{x_1, x_2}, {x_0, x_1}};
-SP = superMatrix(P1, P2, P3, P4);
+SP = superMatrixGenerator(P1, P2, P3, P4);
 assert(superTrace(SP, R, {z_0, z_1}) == x_0-2*x_1+x_3)
 
 R1 = QQ[x_0..x_3]
@@ -324,7 +323,7 @@ M2 = matrix{{1, 2, 3}, {4, 5, 6}};
 M3 = matrix{{3, 4}, {5, 6}, {7, 8}};
 M4 = matrix{{2, 3, 11}, {4, 5, 6}, {7, 8, 9}};
 M5 = sub(M4, QQ);
-G = superMatrix(M1, M2, M3, M4);
+G = superMatrixGenerator(M1, M2, M3, M4);
 assert(berezinian(G, QQ) ==  det(inverse(M5))*det(M1-M2*inverse(M5)*M3))
 
 S1 = matrix{{1, 2}, {3, 4}};
@@ -333,7 +332,7 @@ S3 = matrix{{9, 10}, {11, 12}};
 S4 = matrix{{0, 0}, {0, 0}};
 S5 = sub(S1, QQ);
 S6 = S4-S3*inverse(S5)*S2;
-F = superMatrix(S1, S2, S3, S4);
+F = superMatrixGenerator(S1, S2, S3, S4);
 assert(berezinian(F, QQ) == det(S1)*det(inverse(S6)))
 ///
 
@@ -377,7 +376,7 @@ N11 = inverse(P1);
 N12 = -inverse(M44)*M33*inverse(P1);
 N21 = -inverse(M11)*M22*inverse(P2);
 N22 = inverse(P2);
-G = superMatrix(M1, M2, M3, M4);
+G = superMatrixGenerator(M1, M2, M3, M4);
 assert(inverseSuperMatrix(G, QQ) == matrix{{N11,N12},{N21,N22}})
 ///
 
@@ -444,11 +443,12 @@ doc ///
 Key 
     SuperMatrix
     supermatrix
-    (superMatrix , Matrix, Matrix, Matrix, Matrix)
+    superMatrixGenerator
+    (superMatrixGenerator , Matrix, Matrix, Matrix, Matrix)
 Headline
     Makes a super matrix from its four blocks.
 Usage
-    G = superMatrix(M1, M2, M3, M4)
+    G = superMatrixGenerator(M1, M2, M3, M4)
 Inputs
     M1:Matrix
     M2:Matrix
@@ -480,7 +480,7 @@ Description
         M2 = matrix {{3, 4}, {7, 8}, {11, 12}}
         M3 = matrix {{13, 14}, {17, 18}}
         M4 = matrix {{15, 16}, {19, 20}}
-        G = superMatrix(M1, M2, M3, M4)
+        G = superMatrixGenerator(M1, M2, M3, M4)
         G.supermatrix
 Caveat
 SeeAlso
@@ -511,7 +511,7 @@ Description
          T3&T4\end{pmatrix}$.  
      
         The super trace of $T$ is defined by $superTrace(T)= Trace(T_1)-(-1)^{p(T)} Trace(T_4)$.
-        The inputs of this function are a superMatrix, a ring, which should have skew-symmetric variables, and a list, 
+        The inputs of this function are a SuperMatrix, a ring, which should have skew-symmetric variables, and a list, 
         which is the list of skew-symmetric variables that are used in the superMatrixGenerator. 
         In case that the superMatrix is homogeneous, the output is the super trace of the superMatrix.
         
@@ -635,7 +635,7 @@ Description
         M2 = matrix{{1, 2, 3}, {4, 5, 6}};
         M3 = matrix{{3, 4}, {5, 6}, {7, 8}};
         M4 = matrix{{2, 3, 11}, {4, 5, 6}, {7, 8, 9}};
-        G = superMatrix(M1, M2, M3, M4);
+        G = superMatrixGenerator(M1, M2, M3, M4);
         inverseSuperMatrix(G, QQ)
 Caveat
 SeeAlso
